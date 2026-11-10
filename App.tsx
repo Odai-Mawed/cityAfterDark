@@ -91,7 +91,9 @@ function Main({ saved }: { saved: Saved | null }) {
   const { setDemo } = data;
 
   useEffect(() => {
-    if (params?.get('demo')) setDemo(true);
+    // `?demo=1`, or a host page that can't reach OpenStreetMap (e.g. a sandboxed preview) sets __CAD_DEMO__
+    const forced = Platform.OS === 'web' && (globalThis as { __CAD_DEMO__?: boolean }).__CAD_DEMO__;
+    if (params?.get('demo') || forced) setDemo(true);
   }, [params, setDemo]);
 
   // live clock
