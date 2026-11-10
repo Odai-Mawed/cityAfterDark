@@ -63,7 +63,7 @@ export function filterPlaces(places: Iterable<Place>, f: Filters, at: Date, orig
       continue;
     }
     const status = getStatus(place.tags, at);
-    const showUnknown = f.includeUnknown || f.unknownCategories.includes(place.category);
+    const showUnknown = f.includeUnknown || f.unknownCategories.includes(place.category) || !!place.highlight;
     if (status.state === 'unknown' && !showUnknown) continue;
     if (f.openMode === 'open') {
       if (status.state === 'closed') continue;

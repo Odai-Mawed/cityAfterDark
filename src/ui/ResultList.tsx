@@ -62,6 +62,7 @@ const PlaceRow = memo(function PlaceRow({
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={1}>
           {r.place.name}
+          {r.place.highlight ? <Text style={styles.star}> ★</Text> : null}
           {r.place.demo ? <Text style={styles.demo}> DEMO</Text> : null}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
@@ -158,6 +159,7 @@ const styles = StyleSheet.create({
   body: { flex: 1, minWidth: 0 },
   name: { color: colors.text, fontSize: 16, fontWeight: '600' },
   demo: { color: colors.demo, fontSize: 11, fontWeight: '800' },
+  star: { color: '#ffd166', fontSize: 14 },
   meta: { color: colors.muted, fontSize: 13, marginTop: 2 },
   statusRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
   dot: { width: 7, height: 7, borderRadius: 4, marginRight: 6 },

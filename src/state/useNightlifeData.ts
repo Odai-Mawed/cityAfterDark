@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isInBerlin } from '../core/berlin';
+import { classify } from '../core/categories';
 import { generateDemo } from '../core/demo';
+import { HIGHLIGHT_BY_ID, highlightPlaces } from '../data/berlinHighlights';
 import { clampBBox, containsBBox, distance, padBBox } from '../core/geo';
 import { fetchNightlife } from '../core/overpass';
 import type { BBox, CategoryId, LatLon, Place, Region, TransitLine } from '../core/types';
@@ -22,6 +25,8 @@ export interface NightlifeData {
   status: LoadStatus;
   error: string | null;
   demo: boolean;
+  /** Offline mode shows the curated real Berlin venues instead of fictional demo data. */
+  curated: boolean;
   setDemo: (on: boolean) => void;
   retry: () => void;
 }
@@ -114,9 +119,19 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
 
   const [snapshot, setSnapshot] = useState<{ places: Place[]; lines: TransitLine[] }>({ places: [], lines: [] });
   useEffect(() => {
-    if (demo && demoCenter.current) setSnapshot(generateDemo(demoCenter.current));
-    else setSnapshot({ places: [...places.current.values()], lines: [...lines.current.values()] });
+    if (demo && demoCenter.current) {
+      setSnapshot(isInBerlin(demoCenter.current) ? { places: highlightPlaces(classify), lines: [] } : generateDemo(demoCenter.current));
+    } else {
+      setSnapshot({
+        places: [...places.current.values()].map((p) => {
+          const highlight = HIGHLIGHT_BY_ID.get(p.id);
+          return highlight ? { ...p, highlight } : p;
+        }),
+        lines: [...lines.current.values()],
+      });
+    }
   }, [version, demo]);
 
-  return { ...snapshot, status: demo ? 'idle' : status, error: demo ? null : error, demo, setDemo, retry };
+  const curated = demo && !!demoCenter.current && isInBerlin(demoCenter.current);
+  return { ...snapshot, status: demo ? 'idle' : status, error: demo ? null : error, demo, curated, setDemo, retry };
 }

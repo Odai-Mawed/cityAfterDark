@@ -259,3 +259,20 @@ describe('berlin', () => {
     expect(filterPlaces([club], { ...DEFAULT_FILTERS, unknownCategories: [] }, NOW, club)).toHaveLength(0);
   });
 });
+
+describe('berlin highlights (real OSM data)', () => {
+  it('are all classified, unique and inside Berlin', async () => {
+    const { BERLIN_HIGHLIGHTS, highlightPlaces } = await import('../src/data/berlinHighlights');
+    const { isInBerlin } = await import('../src/core/berlin');
+    const places = highlightPlaces(classify);
+    expect(places).toHaveLength(BERLIN_HIGHLIGHTS.length);
+    expect(new Set(places.map((p) => p.id)).size).toBe(places.length);
+    expect(places.every((p) => isInBerlin(p) && p.highlight && !p.demo)).toBe(true);
+  });
+  it('are shown even without opening hours', async () => {
+    const { highlightPlaces } = await import('../src/data/berlinHighlights');
+    const places = highlightPlaces(classify);
+    const clash = places.find((p) => p.name === 'Clash')!;
+    expect(filterPlaces([clash], DEFAULT_FILTERS, NOW, clash)).toHaveLength(1);
+  });
+});

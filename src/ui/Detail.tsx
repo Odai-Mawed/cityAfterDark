@@ -65,6 +65,12 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
         </View>
       </View>
       {place.demo ? <Text style={styles.demoNote}>Demo-Ort – frei erfunden, nicht real.</Text> : null}
+      {place.highlight ? (
+        <View style={styles.highlight}>
+          <Text style={styles.highlightTitle}>★ Berliner Institution</Text>
+          <Text style={styles.highlightText}>{place.highlight}</Text>
+        </View>
+      ) : null}
 
       <View style={[styles.statusCard, { borderColor: stateColor[status.state] }]}>
         <Text style={[styles.statusText, { color: stateColor[status.state] }]}>{status.label}</Text>
@@ -248,6 +254,9 @@ const styles = StyleSheet.create({
   lineRef: { color: '#111', fontWeight: '800', fontSize: 17 },
   title: { color: colors.text, fontSize: 21, fontWeight: '700' },
   sub: { color: colors.muted, fontSize: 14, marginTop: 3 },
+  highlight: { backgroundColor: 'rgba(255,209,102,0.08)', borderRadius: radius.md, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(255,209,102,0.35)' },
+  highlightTitle: { color: '#ffd166', fontSize: 13, fontWeight: '800', marginBottom: 4 },
+  highlightText: { color: colors.text, fontSize: 14, lineHeight: 20 },
   demoNote: { color: colors.demo, fontSize: 13, marginBottom: 10 },
   statusCard: { borderWidth: 1, borderRadius: radius.md, padding: 12, backgroundColor: colors.surface2, marginBottom: 14 },
   statusText: { fontSize: 16, fontWeight: '700' },

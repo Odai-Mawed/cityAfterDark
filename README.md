@@ -38,6 +38,11 @@ Gebaut mit **React Native + Expo**: ein Code-Stand für **Android, iOS und Web**
   Ort zeigt seinen Ortsteil: aus `addr:suburb`, sonst vom nächstgelegenen Ortsteil-Mittelpunkt (Näherung).
 - **Clubs ohne Öffnungszeiten:** Viele Berliner Clubs veröffentlichen keine festen Zeiten. Sie werden deshalb
   standardmäßig mit „Öffnungszeiten unbekannt“ angezeigt. Das lässt sich im Filter abschalten.
+- **Berliner Institutionen (★):** 19 bekannte Clubs, Bars und Spätis (Berghain, Tresor, Sisyphos, ://about blank,
+  Destille, Klunkerkranich …). Die Auswahl stammt aus einer Web-Recherche, die Daten (Koordinaten, Adresse,
+  Öffnungszeiten) aus OpenStreetMap, Stand 10.11.2026, siehe `src/data/berlinHighlights.ts`. In den Live-Daten sind
+  diese Orte mit ★ und einer Kurzbeschreibung markiert. Ist Overpass nicht erreichbar, zeigt die App sie als
+  „Offline-Auswahl“ statt erfundener Demo-Orte.
 - Feiertage werden nach Berliner Recht ausgewertet (z. B. Frauentag am 8. März).
 
 ## Loslegen
@@ -59,6 +64,17 @@ npm run leaflet    # Leaflet-Bundle neu erzeugen (nach Leaflet-Update)
 ```
 
 Web-Tipp: `?demo=1` startet direkt im Demo-Modus, `?lat=52.51&lon=13.42&z=15` öffnet einen bestimmten Ausschnitt.
+
+### Web-Deployment (Netlify)
+
+Live unter **https://cityafterdark.netlify.app**. `netlify.toml` enthält Build-Befehl, Ausgabeordner und
+SPA-Weiterleitung. Für automatische Deploys bei jedem Push das GitHub-Repo in Netlify mit der Site verbinden.
+Ein manuelles Deploy geht so:
+
+```bash
+npm run build:web
+npx netlify-cli deploy --prod --dir dist
+```
 
 ### App-Builds (Android / iOS)
 

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isInBerlin } from './src/core/berlin';
+import { BERLIN_HIGHLIGHTS_DATE } from './src/data/berlinHighlights';
 import { CATEGORY_BY_ID } from './src/core/categories';
 import { DEFAULT_FILTERS, filterLines, filterPlaces, type Filters } from './src/core/filter';
 import { CITIES, reverseRegion, type City, type GeoResult } from './src/core/geocode';
@@ -414,6 +415,19 @@ function StatusBanner({
       </Pressable>
     );
   }
+  if (data.demo && data.curated) {
+    return (
+      <View style={[styles.banner, { borderColor: colors.accent }]}>
+        <Text style={[styles.bannerText, { flex: 1 }]}>
+          <Text style={{ color: colors.accent, fontWeight: '800' }}>Offline-Auswahl</Text> – {data.places.length} echte
+          Berliner Orte (OpenStreetMap, Stand {BERLIN_HIGHLIGHTS_DATE}).
+        </Text>
+        <Pressable onPress={() => data.setDemo(false)} hitSlop={8}>
+          <Text style={styles.bannerAction}>Live-Daten</Text>
+        </Pressable>
+      </View>
+    );
+  }
   if (data.demo) {
     return (
       <View style={[styles.banner, { borderColor: colors.demo }]}>
@@ -434,7 +448,7 @@ function StatusBanner({
           <Text style={styles.bannerAction}>Erneut</Text>
         </Pressable>
         <Pressable onPress={() => data.setDemo(true)} hitSlop={8}>
-          <Text style={[styles.bannerAction, { marginLeft: 14 }]}>Demo</Text>
+          <Text style={[styles.bannerAction, { marginLeft: 14 }]}>{region && isInBerlin(region.center) ? 'Offline-Auswahl' : 'Demo'}</Text>
         </Pressable>
       </View>
     );

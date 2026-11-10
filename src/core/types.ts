@@ -39,6 +39,8 @@ export interface Place {
   kind: string;
   tags: Tags;
   demo?: boolean;
+  /** Short description for curated Berlin venues ("Berliner Institution"). */
+  highlight?: string;
 }
 
 export interface TransitStop extends LatLon {
