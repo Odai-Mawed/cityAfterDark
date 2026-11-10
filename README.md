@@ -19,8 +19,26 @@ Gebaut mit **React Native + Expo**: ein Code-Stand für **Android, iOS und Web**
 - **Detailansicht** mit Status („Geöffnet · bis 05:00“), Wochenübersicht pro Nacht, Adresse, Website, Telefon,
   Route zu Fuß und Link zu OpenStreetMap
 - **Suche** nach Namen in der Liste, nach Städten und Adressen (Nominatim) und **Mein Standort**
+- **Optimiert für Berlin** (siehe unten)
 - **Demo-Modus** mit frei erfundenen, deutlich markierten Orten, falls die Live-Daten nicht erreichbar sind
 - Filter und Kartenausschnitt werden gespeichert
+
+## Berlin
+
+- **BVG-Nachtnetz:** Neben den Nachtbussen werden in Berlin auch U-Bahn, S-Bahn, MetroTram und MetroBus geladen.
+  Für die gewählte Uhrzeit zeigt jede Linie, ob sie fährt:
+  - In Wochenendnächten (Fr/Sa, Sa/So) und vor Feiertagen fahren U-Bahn (außer U4) und S-Bahn durchgehend.
+  - Unter der Woche hat die U-Bahn ca. 1:00–4:30 Uhr Pause. N1–N9 fahren dann auf der Strecke der gleichnamigen U-Linie
+    (U8 → N8).
+  - MetroTram und MetroBus fahren rund um die Uhr, Nachtbusse ab N10 jede Nacht ca. 0:30–5:00 Uhr.
+
+  Die Regeln sind vereinfacht. Baustellen und Ersatzverkehr kennt die App nicht, deshalb gibt es überall einen Link
+  zur BVG-Fahrinfo.
+- **Kieze:** Die Suche bietet Schnellsprünge zu Ausgehvierteln (Kotti, Weserstraße, Simon-Dach-Kiez, Ostkreuz …). Jeder
+  Ort zeigt seinen Ortsteil: aus `addr:suburb`, sonst vom nächstgelegenen Ortsteil-Mittelpunkt (Näherung).
+- **Clubs ohne Öffnungszeiten:** Viele Berliner Clubs veröffentlichen keine festen Zeiten. Sie werden deshalb
+  standardmäßig mit „Öffnungszeiten unbekannt“ angezeigt. Das lässt sich im Filter abschalten.
+- Feiertage werden nach Berliner Recht ausgewertet (z. B. Frauentag am 8. März).
 
 ## Loslegen
 

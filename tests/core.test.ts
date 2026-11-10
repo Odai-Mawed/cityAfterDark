@@ -7,6 +7,7 @@ import { INTEREST_BY_ID } from '../src/core/interests';
 import { buildQuery, fetchNightlife, parseResponse, type OsmElement } from '../src/core/overpass';
 import { describeSelection, minutesForHour, nightOf, resolveTime, shiftSelection } from '../src/core/time';
 import { generateDemo } from '../src/core/demo';
+import { berlinNightSummary, berlinServiceStatus, isWeekendNight, kiezOf } from '../src/core/berlin';
 import type { Place } from '../src/core/types';
 
 // Tuesday, 10 Nov 2026, 21:00 local time
@@ -196,6 +197,65 @@ describe('demo data', () => {
     expect(a.places.map((p) => p.name)).toEqual(b.places.map((p) => p.name));
     expect(a.places.every((p) => p.demo)).toBe(true);
     expect(new Set(a.places.map((p) => p.category)).size).toBeGreaterThanOrEqual(5);
-    expect(filterLines(a.lines, DEFAULT_FILTERS, { lat: 52.52, lon: 13.4 })).toHaveLength(2);
+    const all = filterLines(a.lines, { ...DEFAULT_FILTERS, openMode: 'all' }, NOW, { lat: 52.52, lon: 13.4 });
+    expect(all.map((l) => l.line.ref).sort()).toEqual(['M99', 'N99', 'U10']);
+  });
+});
+
+describe('berlin', () => {
+  const at = (y: number, m: number, d: number, h: number, min = 0) => new Date(y, m - 1, d, h, min);
+  const u8 = { mode: 'subway', ref: 'U8' };
+
+  it('knows weekend nights and nights before holidays', () => {
+    expect(isWeekendNight(new Date(2026, 10, 13))).toBe(true); // Fri
+    expect(isWeekendNight(new Date(2026, 10, 10))).toBe(false); // Tue
+    expect(isWeekendNight(new Date(2026, 11, 24))).toBe(true); // Thu before Christmas Day
+  });
+
+  it('runs U-Bahn all night on weekends, pauses on weekdays', () => {
+    expect(berlinServiceStatus(u8, at(2026, 11, 14, 3)).state).toBe('running'); // Sat 03:00
+    const tue = berlinServiceStatus(u8, at(2026, 11, 11, 2)); // Wed 02:00 (Tue night)
+    expect(tue).toMatchObject({ state: 'paused', hint: 'Ersatz: Nachtbus N8' });
+    expect(berlinServiceStatus(u8, at(2026, 11, 10, 23)).state).toBe('running');
+    expect(berlinServiceStatus({ mode: 'subway', ref: 'U4' }, at(2026, 11, 14, 3)).state).toBe('paused');
+  });
+
+  it('runs N1–N9 only when the U-Bahn pauses', () => {
+    const n8 = { mode: 'bus', ref: 'N8' };
+    expect(berlinServiceStatus(n8, at(2026, 11, 11, 2))).toMatchObject({ state: 'running', hint: 'ersetzt U8' });
+    expect(berlinServiceStatus(n8, at(2026, 11, 14, 2)).state).toBe('paused');
+    expect(berlinServiceStatus({ mode: 'bus', ref: 'N40' }, at(2026, 11, 14, 2)).state).toBe('running');
+    expect(berlinServiceStatus({ mode: 'bus', ref: 'N40' }, at(2026, 11, 13, 22)).state).toBe('paused');
+  });
+
+  it('runs MetroTram around the clock', () => {
+    expect(berlinServiceStatus({ mode: 'tram', ref: 'M10' }, at(2026, 11, 11, 3)).state).toBe('running');
+  });
+
+  it('summarises the night network', () => {
+    expect(berlinNightSummary(at(2026, 11, 14, 2)).title).toBe('Wochenendnacht');
+    expect(berlinNightSummary(at(2026, 11, 11, 2)).title).toBe('Nacht unter der Woche');
+  });
+
+  it('labels Kieze', () => {
+    expect(kiezOf({ lat: 52.4993, lon: 13.4185 })).toBe('Kreuzberg');
+    expect(kiezOf({ lat: 52.4872, lon: 13.4322 })).toBe('Neukölln');
+    expect(kiezOf({ lat: 52.5, lon: 13.4 }, { 'addr:suburb': 'Mitte' })).toBe('Mitte');
+    expect(kiezOf({ lat: 48.13, lon: 11.58 })).toBeUndefined();
+  });
+
+  it('adds the Berlin network to the query inside Berlin only', () => {
+    const berlin = buildQuery({ south: 52.49, west: 13.4, north: 52.51, east: 13.43 }, ['transit']);
+    expect(berlin).toContain('"route"="subway"');
+    expect(berlin).toContain('out geom(');
+    const munich = buildQuery({ south: 48.1, west: 11.5, north: 48.2, east: 11.6 }, ['transit']);
+    expect(munich).not.toContain('"route"="subway"');
+  });
+
+  it('shows clubs without opening hours by default', () => {
+    const club = place({ amenity: 'nightclub', name: 'Ohne Zeiten' });
+    const r = filterPlaces([club], DEFAULT_FILTERS, at(2026, 11, 14, 2), club);
+    expect(r).toHaveLength(1);
+    expect(filterPlaces([club], { ...DEFAULT_FILTERS, unknownCategories: [] }, NOW, club)).toHaveLength(0);
   });
 });

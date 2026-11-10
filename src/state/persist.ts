@@ -19,6 +19,7 @@ export async function loadSaved(): Promise<Saved | null> {
     // drop ids that no longer exist after updates
     f.categories = f.categories.filter((c) => c in CATEGORY_BY_ID);
     f.interests = f.interests.filter((i) => i in INTEREST_BY_ID);
+    f.unknownCategories = (f.unknownCategories ?? []).filter((c) => c in CATEGORY_BY_ID);
     f.query = '';
     const v = s.view;
     const view = v && Number.isFinite(v.lat) && Number.isFinite(v.lon) && Number.isFinite(v.zoom) ? v : undefined;

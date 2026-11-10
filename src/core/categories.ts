@@ -175,8 +175,8 @@ export const TRANSIT_MODE_LABELS: Record<string, string> = {
   bus: 'Nachtbus',
   trolleybus: 'Nacht-O-Bus',
   tram: 'Nacht-Tram',
-  subway: 'U-Bahn (Nacht)',
-  light_rail: 'S-Bahn (Nacht)',
+  subway: 'U-Bahn',
+  light_rail: 'S-Bahn',
   train: 'Nachtzug',
   ferry: 'Nachtfähre',
 };

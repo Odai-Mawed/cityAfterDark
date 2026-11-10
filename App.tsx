@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isInBerlin } from './src/core/berlin';
 import { CATEGORY_BY_ID } from './src/core/categories';
 import { DEFAULT_FILTERS, filterLines, filterPlaces, type Filters } from './src/core/filter';
 import { CITIES, reverseRegion, type City, type GeoResult } from './src/core/geocode';
@@ -23,6 +24,7 @@ import { NightMap, type MapCommand } from './src/map/NightMap';
 import type { MapLine, MapMarker } from './src/map/protocol';
 import { loadSaved, save, type Saved } from './src/state/persist';
 import { MIN_ZOOM, useNightlifeData } from './src/state/useNightlifeData';
+import { BerlinNightCard } from './src/ui/BerlinNightCard';
 import { LineDetail, PlaceDetail } from './src/ui/Detail';
 import { CategoryChips, FilterPanel } from './src/ui/FilterPanel';
 import { ResultList, type ListItem } from './src/ui/ResultList';
@@ -134,16 +136,17 @@ function Main({ saved }: { saved: Saved | null }) {
   }, [region]);
 
   const results = useMemo(() => filterPlaces(data.places, filters, at, origin), [data.places, filters, at, origin]);
-  const lines = useMemo(() => filterLines(data.lines, filters, origin), [data.lines, filters, origin]);
+  const lines = useMemo(() => filterLines(data.lines, filters, at, origin), [data.lines, filters, at, origin]);
+  const inBerlin = isInBerlin(region?.center ?? initialView);
 
   const items: ListItem[] = useMemo(() => {
     const list: ListItem[] = results.map((r) => ({ kind: 'place', r }));
     // night lines go after the open places, before unknown/closed ones
     const insertAt = results.findIndex((r) => r.status.state !== 'open');
-    const lineItems: ListItem[] = lines.map((line) => ({ kind: 'line', line, distance: distance(origin, line.center) }));
+    const lineItems: ListItem[] = lines.map((r) => ({ kind: 'line', r }));
     list.splice(insertAt === -1 ? list.length : insertAt, 0, ...lineItems);
     return list;
-  }, [results, lines, origin]);
+  }, [results, lines]);
 
   const markers: MapMarker[] = useMemo(
     () =>
@@ -160,13 +163,14 @@ function Main({ saved }: { saved: Saved | null }) {
   );
   const mapLines: MapLine[] = useMemo(
     () =>
-      lines.map((l) => ({
+      lines.map(({ line: l, service }) => ({
         id: l.id,
         ref: l.ref,
-        label: `🌙 ${l.ref ? l.ref + ' · ' : ''}${l.modeLabel}`,
+        label: `${l.ref ? l.ref + ' · ' : ''}${l.modeLabel} · ${service.label}`,
         color: l.color ?? CATEGORY_BY_ID.transit.color,
         coords: l.coords,
         stops: l.stops,
+        dim: service.state === 'paused',
       })),
     [lines],
   );
@@ -231,7 +235,7 @@ function Main({ saved }: { saved: Saved | null }) {
       <Text style={styles.summaryText} numberOfLines={1}>
         <Text style={{ color: colors.open, fontWeight: '700' }}>{openCount}</Text> geöffnet
         {results.length > openCount ? ` · ${results.length - openCount} weitere` : ''}
-        {lines.length ? ` · ${lines.length} ${lines.length === 1 ? 'Nachtlinie' : 'Nachtlinien'}` : ''}
+        {lines.length ? ` · ${lines.length} ${lines.length === 1 ? 'Linie' : 'Linien'}` : ''}
       </Text>
       <Pressable onPress={() => setTab('filter')} hitSlop={6}>
         <Text style={styles.summaryTime}>🕑 {describeSelection(time, now)}</Text>
@@ -262,9 +266,15 @@ function Main({ saved }: { saved: Saved | null }) {
   const body = selectedPlace ? (
     <PlaceDetail place={selectedPlace} at={at} origin={origin} onClose={() => setSelectedId(null)} />
   ) : selectedLine ? (
-    <LineDetail line={selectedLine} origin={origin} onClose={() => setSelectedId(null)} />
+    <LineDetail line={selectedLine} at={at} origin={origin} onClose={() => setSelectedId(null)} />
   ) : tab === 'list' ? (
-    <ResultList items={items} selectedId={selectedId} onSelect={onListSelect} empty={emptyState} />
+    <ResultList
+      items={items}
+      selectedId={selectedId}
+      onSelect={onListSelect}
+      empty={emptyState}
+      header={inBerlin && filters.categories.includes('transit') ? <BerlinNightCard at={at} /> : undefined}
+    />
   ) : (
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 32 }}>
       <FilterPanel filters={filters} onChange={setFilters} time={time} now={now} onTime={setTime} />
@@ -304,6 +314,10 @@ function Main({ saved }: { saved: Saved | null }) {
       onQuery={(q) => setFilters((f) => ({ ...f, query: q }))}
       onPickCity={onPickCity}
       onPickPlace={onPickPlace}
+      onPickKiez={(k) => {
+        setSelectedId(null);
+        flyTo(k.lat, k.lon, k.zoom);
+      }}
       onLocate={onLocate}
       locating={locating}
     />
@@ -344,9 +358,6 @@ function Main({ saved }: { saved: Saved | null }) {
   return (
     <View style={styles.root}>
       <View style={[styles.mapWrap, { marginBottom: Math.min(sheetHeight, height * 0.5) - 16 }]}>{map}</View>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
-        {search}
-      </View>
       <View style={[styles.sheet, { height: sheetHeight, paddingBottom: insets.bottom }]}>
         <Pressable
           onPress={() => setSheet((s) => (s === 'min' ? 'mid' : s === 'mid' ? 'max' : 'min'))}
@@ -365,6 +376,10 @@ function Main({ saved }: { saved: Saved | null }) {
             <View style={styles.body}>{body}</View>
           </>
         ) : null}
+      </View>
+      {/* rendered last so the search dropdown overlays the sheet */}
+      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
+        {search}
       </View>
     </View>
   );

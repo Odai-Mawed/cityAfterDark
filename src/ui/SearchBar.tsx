@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { KIEZE, type Kiez } from '../core/berlin';
 import { CITIES, searchPlaces, type City, type GeoResult } from '../core/geocode';
 import { colors, radius } from './theme';
 
@@ -8,6 +9,7 @@ interface Props {
   onQuery: (q: string) => void;
   onPickPlace: (r: GeoResult) => void;
   onPickCity: (c: City) => void;
+  onPickKiez: (k: Kiez) => void;
   onLocate: () => void;
   locating: boolean;
 }
@@ -16,11 +18,12 @@ interface Props {
  * One input for two things: it filters the visible places by name and, from
  * three characters on, offers to jump to a city/address (Nominatim).
  */
-export function SearchBar({ query, onQuery, onPickPlace, onPickCity, onLocate, locating }: Props) {
+export function SearchBar({ query, onQuery, onPickPlace, onPickCity, onPickKiez, onLocate, locating }: Props) {
   const [focused, setFocused] = useState(false);
   const [results, setResults] = useState<GeoResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { height } = useWindowDimensions();
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export function SearchBar({ query, onQuery, onPickPlace, onPickCity, onLocate, l
           <TextInput
             value={query}
             onChangeText={onQuery}
-            placeholder="Ort, Stadt oder Name suchen"
+            placeholder="Kiez, Adresse oder Name suchen"
             placeholderTextColor={colors.faint}
             style={styles.input}
             onFocus={() => {
@@ -94,12 +97,35 @@ export function SearchBar({ query, onQuery, onPickPlace, onPickCity, onLocate, l
       </View>
 
       {focused ? (
-        <View style={styles.dropdown}>
+        <ScrollView
+          style={[styles.dropdown, { maxHeight: Math.round(height * 0.6) }]}
+          keyboardShouldPersistTaps="handled"
+        >
           {!query.trim() ? (
             <>
-              <Text style={styles.dropTitle}>Städte</Text>
+              <Text style={styles.dropTitle}>Berliner Kieze</Text>
+              <View style={styles.kiezGrid}>
+                {KIEZE.map((k) => (
+                  <Pressable
+                    key={k.name}
+                    style={({ pressed }) => [styles.kiez, pressed && { backgroundColor: colors.surface3 }]}
+                    onPress={() => {
+                      onPickKiez(k);
+                      close();
+                    }}
+                  >
+                    <Text style={styles.kiezName} numberOfLines={1}>
+                      {k.name}
+                    </Text>
+                    <Text style={styles.kiezHint} numberOfLines={1}>
+                      {k.hint}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={[styles.dropTitle, { marginTop: 10 }]}>Andere Städte</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {CITIES.map((c) => (
+                {CITIES.filter((c) => c.name !== 'Berlin').map((c) => (
                   <Pressable
                     key={c.name}
                     style={styles.city}
@@ -138,7 +164,7 @@ export function SearchBar({ query, onQuery, onPickPlace, onPickCity, onLocate, l
               ) : null}
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
       ) : null}
     </View>
   );
@@ -190,6 +216,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   cityText: { color: colors.text, fontSize: 14 },
+  kiezGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -3 },
+  kiez: { width: '50%', paddingVertical: 6, paddingHorizontal: 8, borderRadius: radius.sm },
+  kiezName: { color: colors.text, fontSize: 14, fontWeight: '600' },
+  kiezHint: { color: colors.muted, fontSize: 12, marginTop: 1 },
   hint: { color: colors.faint, fontSize: 12, marginBottom: 4 },
   error: { color: colors.closed, fontSize: 13, paddingVertical: 6 },
   result: { paddingVertical: 8, paddingHorizontal: 6, borderRadius: radius.sm },

@@ -1,3 +1,4 @@
+import { BERLIN_MODE_LABELS, bboxIntersectsBerlin, berlinProduct, isInBerlin } from './berlin';
 import { CATEGORY_BY_ID, TRANSIT_MODE_LABELS, classify } from './categories';
 import type { BBox, CategoryId, LatLon, Place, Tags, TransitLine, TransitStop } from './types';
 
@@ -33,8 +34,16 @@ export function buildQuery(bbox: BBox, categories: CategoryId[], timeout = 40): 
     lines.push(`  rel["type"="route"]["route"~"^(${NIGHT_MODES})$"]["by_night"~"^(yes|only)$"](${bb});`);
     lines.push(`  rel["type"="route"]["route"~"^(bus|trolleybus|tram)$"]["ref"~"^N ?[0-9]+[A-Z]?$"](${bb});`);
     lines.push(`  rel["type"="route"]["route"="train"]["service"="night"](${bb});`);
+    if (bboxIntersectsBerlin(bbox)) {
+      // Berlin: the night network also includes U-/S-Bahn (all night on weekends),
+      // MetroTram and MetroBus (24/7).
+      lines.push(`  rel["type"="route"]["route"="subway"]["ref"~"^U ?[0-9]+$"](${bb});`);
+      lines.push(`  rel["type"="route"]["route"~"^(light_rail|train)$"]["ref"~"^S ?[0-9]+$"](${bb});`);
+      lines.push(`  rel["type"="route"]["route"~"^(tram|bus)$"]["ref"~"^M ?[0-9]+$"](${bb});`);
+    }
     lines.push(')->.nr;');
-    lines.push('.nr out geom qt;');
+    // clip geometry to the bbox – long S-Bahn routes would otherwise be huge
+    lines.push(`.nr out geom(${bb}) qt;`);
     lines.push('node(r.nr)["name"];out qt;');
   }
   return lines.join('\n');
@@ -149,7 +158,7 @@ function buildLines(routes: OsmElement[], nodeNames: Map<number, string>): Trans
       ref,
       name: tags.name ?? ref,
       mode,
-      modeLabel: TRANSIT_MODE_LABELS[mode] ?? 'Nachtlinie',
+      modeLabel: modeLabel(mode, ref, r.members ?? []),
       color: tags.colour,
       from: tags.from,
       to: tags.to,
@@ -166,6 +175,14 @@ function buildLines(routes: OsmElement[], nodeNames: Map<number, string>): Trans
     l.center = lineCenter(l);
   }
   return lines;
+}
+
+function modeLabel(mode: string, ref: string, members: OsmMember[]): string {
+  const product = berlinProduct(mode, ref);
+  const first = members.find((m) => m.lat != null || m.geometry?.some(Boolean));
+  const p = first?.lat != null ? { lat: first.lat, lon: first.lon! } : first?.geometry?.find(Boolean);
+  if (product && (!p || isInBerlin(p))) return BERLIN_MODE_LABELS[product];
+  return TRANSIT_MODE_LABELS[mode] ?? 'Nachtlinie';
 }
 
 function dedupeStops(stops: TransitStop[]): TransitStop[] {

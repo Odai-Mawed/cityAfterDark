@@ -61,8 +61,14 @@ export function FilterPanel({ filters, onChange, time, now, onTime }: Props) {
           onValue={(v) => set({ openMode: v ? 'open' : 'all' })}
         />
         <Row
-          label="Ohne Öffnungszeiten zeigen"
-          detail="Viele Spätis haben keine Zeiten in OpenStreetMap"
+          label="Clubs ohne Öffnungszeiten zeigen"
+          detail="Viele Berliner Clubs veröffentlichen keine festen Zeiten"
+          value={filters.includeUnknown || filters.unknownCategories.includes('club')}
+          onValue={(v) => set({ unknownCategories: v ? ['club'] : [], includeUnknown: v ? filters.includeUnknown : false })}
+        />
+        <Row
+          label="Alle Orte ohne Öffnungszeiten zeigen"
+          detail="Auch Spätis, Bars usw. – viele haben keine Zeiten in OpenStreetMap"
           value={filters.includeUnknown}
           onValue={(v) => set({ includeUnknown: v })}
         />

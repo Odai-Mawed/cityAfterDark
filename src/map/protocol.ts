@@ -15,6 +15,8 @@ export interface MapLine {
   color: string;
   coords: [number, number][][];
   stops: { lat: number; lon: number; name?: string }[];
+  /** Not running at the selected time. */
+  dim?: boolean;
 }
 
 /** React → map */

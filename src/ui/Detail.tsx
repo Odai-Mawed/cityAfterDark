@@ -1,5 +1,7 @@
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BVG_TRIP_PLANNER, isInBerlin, kiezOf } from '../core/berlin';
 import { CATEGORY_BY_ID } from '../core/categories';
+import { lineService } from '../core/filter';
 import { distance, formatDistance, walkingMinutes } from '../core/geo';
 import { getNightSchedule, getStatus } from '../core/hours';
 import { matchingInterests } from '../core/interests';
@@ -45,6 +47,7 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
   const phone = place.tags.phone ?? place.tags['contact:phone'];
   const address = addressOf(place.tags);
   const d = distance(origin, place);
+  const kiez = kiezOf(place, place.tags);
 
   return (
     <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
@@ -56,7 +59,8 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>{place.name}</Text>
           <Text style={styles.sub}>
-            {place.kind} · {formatDistance(d)} · ca. {walkingMinutes(d)} min zu Fuß
+            {place.kind}
+            {kiez ? ` · ${kiez}` : ''} · {formatDistance(d)} · ca. {walkingMinutes(d)} min zu Fuß
           </Text>
         </View>
       </View>
@@ -121,8 +125,21 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
   );
 }
 
-export function LineDetail({ line, origin, onClose }: { line: TransitLine; origin: LatLon; onClose: () => void }) {
+export function LineDetail({
+  line,
+  at,
+  origin,
+  onClose,
+}: {
+  line: TransitLine;
+  at: Date;
+  origin: LatLon;
+  onClose: () => void;
+}) {
   const color = line.color ?? CATEGORY_BY_ID.transit.color;
+  const service = lineService(line, at);
+  const berlin = isInBerlin(line.center);
+  const serviceColor = service.state === 'running' ? colors.open : service.state === 'paused' ? colors.closed : colors.muted;
   const nearest = [...line.stops].sort((a, b) => distance(origin, a) - distance(origin, b))[0];
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
@@ -140,6 +157,10 @@ export function LineDetail({ line, origin, onClose }: { line: TransitLine; origi
         </View>
       </View>
       {line.demo ? <Text style={styles.demoNote}>Demo-Linie – frei erfunden, nicht real.</Text> : null}
+      <View style={[styles.statusCard, { borderColor: serviceColor }]}>
+        <Text style={[styles.statusText, { color: serviceColor }]}>{service.label}</Text>
+        {service.hint ? <Text style={styles.comment}>{service.hint}</Text> : null}
+      </View>
       {nearest ? (
         <View style={[styles.statusCard, { borderColor: color }]}>
           <Text style={[styles.statusText, { color }]}>
@@ -164,14 +185,16 @@ export function LineDetail({ line, origin, onClose }: { line: TransitLine; origi
         </View>
       ) : null}
       <Text style={styles.footnote}>
-        Nachtlinien aus OpenStreetMap (by_night bzw. Liniennummern mit „N“). Fahrpläne bitte beim Verkehrsbetrieb
-        prüfen.
+        {berlin
+          ? 'Betriebszeiten nach den vereinfachten BVG-/S-Bahn-Regeln fürs Nachtnetz. Baustellen und Ersatzverkehr sind nicht berücksichtigt – im Zweifel die BVG-Fahrinfo prüfen.'
+          : 'Nachtlinien aus OpenStreetMap (by_night bzw. Liniennummern mit „N“). Fahrpläne bitte beim Verkehrsbetrieb prüfen.'}
       </Text>
-      {!line.demo && line.osmIds[0] ? (
-        <View style={styles.actions}>
+      <View style={styles.actions}>
+        {berlin ? <Action label="BVG-Fahrinfo" icon="🚇" primary onPress={() => open(BVG_TRIP_PLANNER)} /> : null}
+        {!line.demo && line.osmIds[0] ? (
           <Action label="In OSM" icon="🗺" onPress={() => open(`https://www.openstreetmap.org/${line.osmIds[0]}`)} />
-        </View>
-      ) : null}
+        ) : null}
+      </View>
     </ScrollView>
   );
 }

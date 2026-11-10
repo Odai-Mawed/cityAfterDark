@@ -83,7 +83,8 @@ const CONTROLLER = String.raw`
         renderer: renderer,
         color: l.color,
         weight: sel ? 6 : 3.5,
-        opacity: lineSelected && !sel ? 0.3 : 0.85,
+        opacity: (lineSelected && !sel) || (l.dim && !sel) ? 0.3 : 0.85,
+        dashArray: l.dim && !sel ? '6 8' : null,
         lineCap: 'round',
       });
       poly.bindTooltip(l.label, { sticky: true, className: 'cad-tip' });

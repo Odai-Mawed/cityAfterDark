@@ -1,12 +1,12 @@
 import { memo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CATEGORY_BY_ID } from '../core/categories';
-import type { PlaceResult } from '../core/filter';
+import { kiezOf } from '../core/berlin';
+import type { LineResult, PlaceResult } from '../core/filter';
 import { formatDistance, walkingMinutes } from '../core/geo';
-import type { TransitLine } from '../core/types';
 import { colors, radius, stateColor } from './theme';
 
-export type ListItem = { kind: 'place'; r: PlaceResult } | { kind: 'line'; line: TransitLine; distance: number };
+export type ListItem = { kind: 'place'; r: PlaceResult } | { kind: 'line'; r: LineResult };
 
 interface Props {
   items: ListItem[];
@@ -20,12 +20,12 @@ export function ResultList({ items, selectedId, onSelect, empty, header }: Props
   return (
     <FlatList
       data={items}
-      keyExtractor={(it) => (it.kind === 'place' ? it.r.place.id : it.line.id)}
+      keyExtractor={(it) => (it.kind === 'place' ? it.r.place.id : it.r.line.id)}
       renderItem={({ item }) =>
         item.kind === 'place' ? (
           <PlaceRow r={item.r} selected={item.r.place.id === selectedId} onSelect={onSelect} />
         ) : (
-          <LineRow line={item.line} distance={item.distance} selected={item.line.id === selectedId} onSelect={onSelect} />
+          <LineRow r={item.r} selected={item.r.line.id === selectedId} onSelect={onSelect} />
         )
       }
       ListEmptyComponent={<View style={styles.empty}>{empty}</View>}
@@ -48,6 +48,7 @@ const PlaceRow = memo(function PlaceRow({
   onSelect: (id: string) => void;
 }) {
   const cat = CATEGORY_BY_ID[r.place.category];
+  const kiez = kiezOf(r.place, r.place.tags);
   return (
     <Pressable
       onPress={() => onSelect(r.place.id)}
@@ -64,7 +65,8 @@ const PlaceRow = memo(function PlaceRow({
           {r.place.demo ? <Text style={styles.demo}> DEMO</Text> : null}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {r.place.kind} · {formatDistance(r.distance)} · {walkingMinutes(r.distance)} min zu Fuß
+          {r.place.kind}
+          {kiez ? ` · ${kiez}` : ''} · {formatDistance(r.distance)} · {walkingMinutes(r.distance)} min
         </Text>
         <View style={styles.statusRow}>
           <View style={[styles.dot, { backgroundColor: stateColor[r.status.state] }]} />
@@ -77,24 +79,25 @@ const PlaceRow = memo(function PlaceRow({
   );
 });
 
+const SERVICE_COLOR = { running: colors.open, paused: colors.closed, unknown: colors.muted } as const;
+
 const LineRow = memo(function LineRow({
-  line,
-  distance,
+  r,
   selected,
   onSelect,
 }: {
-  line: TransitLine;
-  distance: number;
+  r: LineResult;
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
+  const { line, service, distance } = r;
   const color = line.color ?? CATEGORY_BY_ID.transit.color;
   return (
     <Pressable
       onPress={() => onSelect(line.id)}
       style={({ pressed }) => [styles.row, selected && styles.selected, pressed && { backgroundColor: colors.surface3 }]}
       accessibilityRole="button"
-      accessibilityLabel={`${line.modeLabel} ${line.ref}`}
+      accessibilityLabel={`${line.modeLabel} ${line.ref}, ${service.label}`}
     >
       <View style={[styles.lineBadge, { backgroundColor: color }]}>
         <Text style={styles.lineRef} numberOfLines={1}>
@@ -110,9 +113,13 @@ const LineRow = memo(function LineRow({
           {line.modeLabel}
           {line.operator ? ` · ${line.operator}` : ''} · {formatDistance(distance)}
         </Text>
-        <Text style={[styles.status, { color: colors.muted }]} numberOfLines={1}>
-          {line.stops.length ? `${line.stops.length} Haltestellen` : 'Linienverlauf'}
-        </Text>
+        <View style={styles.statusRow}>
+          <View style={[styles.dot, { backgroundColor: SERVICE_COLOR[service.state] }]} />
+          <Text style={[styles.status, { color: SERVICE_COLOR[service.state] }]} numberOfLines={1}>
+            {service.label}
+            {service.hint ? <Text style={{ color: colors.muted, fontWeight: '500' }}> · {service.hint}</Text> : null}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );

@@ -119,18 +119,18 @@ export function generateDemo(center: LatLon, seed = 42): { places: Place[]; line
     });
   }
 
-  const mkLine = (ref: string, angle: number, color: string): TransitLine => {
+  const mkLine = (ref: string, mode: string, modeLabel: string, angle: number, color: string): TransitLine => {
     const coords: [number, number][] = [];
     for (let s = -6; s <= 6; s++) {
       const d = s * 0.003;
       coords.push([center.lat + Math.sin(angle) * d + Math.sin(s) * 0.0006, center.lon + Math.cos(angle) * d * 1.6]);
     }
     return {
-      id: `bus:${ref}`,
+      id: `${mode}:${ref}`,
       ref,
-      name: `Nachtbus ${ref}: Demo-Nord ⇄ Demo-Süd`,
-      mode: 'bus',
-      modeLabel: 'Nachtbus',
+      name: `${modeLabel} ${ref}: Demo-Nord ⇄ Demo-Süd`,
+      mode,
+      modeLabel,
       color,
       from: 'Demo-Nord',
       to: 'Demo-Süd',
@@ -143,5 +143,13 @@ export function generateDemo(center: LatLon, seed = 42): { places: Place[]; line
     };
   };
 
-  return { places, lines: [mkLine('N1', 0.4, '#ffe066'), mkLine('N7', 2.1, '#ffb703')] };
+  // fictional line numbers that don't exist in Berlin, but follow BVG patterns
+  return {
+    places,
+    lines: [
+      mkLine('U10', 'subway', 'U-Bahn', 0.4, '#3f8fd2'),
+      mkLine('M99', 'tram', 'MetroTram', 2.1, '#e3332c'),
+      mkLine('N99', 'bus', 'Nachtbus', 1.2, '#ffe066'),
+    ],
+  };
 }
