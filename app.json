@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "CityAfterDark",
+    "slug": "cityafterdark",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cityafterdark.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "CityAfterDark zeigt dir Clubs, Bars und Spätis in deiner Nähe."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0b14",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.cityafterdark.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "CityAfterDark",
+      "shortName": "AfterDark",
+      "themeColor": "#0b0b14",
+      "backgroundColor": "#0b0b14",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "scheme": "cityafterdark",
+    "backgroundColor": "#0b0b14",
+    "description": "Das Nachtleben auf einer Karte: Clubs, Bars, Spätis, Nachtverkehr und Orte, die spät geöffnet sind.",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b0b14"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "CityAfterDark zeigt dir Clubs, Bars und Spätis in deiner Nähe."
+        }
+      ]
+    ]
+  }
+}
