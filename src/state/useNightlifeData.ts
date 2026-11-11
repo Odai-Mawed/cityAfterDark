@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import { BERLIN_BBOX, isInBerlin } from '../core/berlin';
+import { isInBerlin } from '../core/berlin';
 import { CATEGORIES, classify } from '../core/categories';
 import { isSnapshot } from '../core/clean';
 import { generateDemo } from '../core/demo';
@@ -83,7 +83,8 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
         if (Date.now() - generated.getTime() > SNAPSHOT_MAX_AGE_DAYS * 86400000) throw new Error('Veraltet');
         for (const p of snap.places) places.current.set(p.id, p);
         for (const l of snap.lines) lines.current.set(l.id, l);
-        loaded.current.push({ bbox: BERLIN_BBOX, categories: new Set(CATEGORIES.map((c) => c.id)) });
+        const all = CATEGORIES.map((c) => c.id);
+        for (const bbox of snap.areas) loaded.current.push({ bbox, categories: new Set(all) });
         setSnapshotDate(generated);
         setSnapState('done');
         setError(null);

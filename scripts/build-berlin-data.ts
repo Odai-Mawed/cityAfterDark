@@ -23,7 +23,8 @@ import type { BBox, CategoryId } from '../src/core/types';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'public/data/berlin.json');
-const GRID = Number(process.env.BERLIN_GRID ?? 3); // GRID x GRID tiles
+const GRID = Number(process.env.BERLIN_GRID ?? 4); // GRID x GRID tiles
+const ATTEMPTS = 4;
 const UA = 'CityAfterDark/1.0 (daily data snapshot; https://cityafterdark.netlify.app)';
 const ALL: CategoryId[] = CATEGORIES.map((c) => c.id);
 
@@ -41,17 +42,17 @@ function tiles(b: BBox, n: number): BBox[] {
   return out;
 }
 
-async function fetchTile(bbox: BBox, label: string): Promise<OsmElement[]> {
-  const query = buildQuery(bbox, ALL, 180);
-  let wait = 10_000;
-  for (let attempt = 1; attempt <= 6; attempt++) {
+async function fetchTile(bbox: BBox, label: string): Promise<OsmElement[] | null> {
+  const query = buildQuery(bbox, ALL, 120);
+  let wait = 15_000;
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
     const endpoint = OVERPASS_ENDPOINTS[(attempt - 1) % OVERPASS_ENDPOINTS.length];
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': UA },
         body: `data=${encodeURIComponent(query)}`,
-        signal: AbortSignal.timeout(240_000),
+        signal: AbortSignal.timeout(150_000),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = (await res.json()) as { elements?: OsmElement[]; remark?: string };
@@ -61,11 +62,12 @@ async function fetchTile(bbox: BBox, label: string): Promise<OsmElement[]> {
       return json.elements;
     } catch (e) {
       console.warn(`  ${label}: Versuch ${attempt} über ${new URL(endpoint).host} fehlgeschlagen – ${(e as Error).message}`);
-      await sleep(wait);
-      wait = Math.min(wait * 2, 120_000);
+      if (attempt < ATTEMPTS) await sleep(wait);
+      wait = Math.min(wait * 2, 60_000);
     }
   }
-  throw new Error(`Kachel ${label} konnte nicht geladen werden`);
+  console.warn(`  ${label}: ausgelassen – die App lädt dieses Gebiet live`);
+  return null;
 }
 
 async function main() {
@@ -75,9 +77,12 @@ async function main() {
 
   const elements: OsmElement[] = [];
   const seen = new Set<string>();
+  const areas: BBox[] = [];
   const list = tiles(BERLIN_BBOX, GRID);
   for (const [i, t] of list.entries()) {
     const els = await fetchTile(t, `Kachel ${i + 1}/${list.length}`);
+    if (!els) continue;
+    areas.push(t);
     for (const el of els) {
       // relations appear in several tiles with differently clipped geometry – keep all of them
       const key = `${el.type}/${el.id}`;
@@ -88,6 +93,11 @@ async function main() {
     await sleep(3000); // be nice to the public servers
   }
 
+  // a mostly empty snapshot would hide live data – rather keep the old one
+  if (areas.length < list.length / 2) {
+    throw new Error(`Nur ${areas.length}/${list.length} Kacheln geladen – kein Schnappschuss geschrieben`);
+  }
+
   const parsed = parseResponse(elements, ALL);
   const { places, stats } = cleanPlaces(parsed.places, now);
   const lines = cleanLines(parsed.lines);
@@ -96,6 +106,7 @@ async function main() {
     version: SNAPSHOT_VERSION,
     generated: now.toISOString(),
     attribution: '© OpenStreetMap-Mitwirkende (ODbL), über die Overpass API',
+    areas,
     places,
     lines,
   };
@@ -105,6 +116,7 @@ async function main() {
 
   const byCat = new Map<string, number>();
   for (const p of places) byCat.set(p.category, (byCat.get(p.category) ?? 0) + 1);
+  console.log(`Kacheln: ${areas.length}/${list.length} geladen`);
   console.log(`Bereinigt: ${stats.input} → ${stats.output} Orte (${stats.notOpening} öffnen nicht in 14 Tagen, ${stats.notLate} nicht spät geöffnet)`);
   console.log(`Kategorien: ${[...byCat].map(([k, v]) => `${k} ${v}`).join(', ')} · ${lines.length} Linien`);
   console.log(`Geschrieben: ${OUT} (${(json.length / 1024 / 1024).toFixed(2)} MB)`);

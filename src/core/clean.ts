@@ -1,5 +1,5 @@
 import { parseHours } from './hours';
-import type { Place, Tags, TransitLine } from './types';
+import type { BBox, Place, Tags, TransitLine } from './types';
 
 /**
  * Cleaning rules for the daily Berlin data snapshot (scripts/build-berlin-data.ts).
@@ -161,11 +161,20 @@ export interface Snapshot {
   /** ISO timestamp of the Overpass download. */
   generated: string;
   attribution: string;
+  /** Areas that were loaded completely (missing tiles are loaded live by the app). */
+  areas: BBox[];
   places: Place[];
   lines: TransitLine[];
 }
 
 export function isSnapshot(x: unknown): x is Snapshot {
   const s = x as Snapshot;
-  return !!s && s.version === SNAPSHOT_VERSION && typeof s.generated === 'string' && Array.isArray(s.places) && Array.isArray(s.lines);
+  return (
+    !!s &&
+    s.version === SNAPSHOT_VERSION &&
+    typeof s.generated === 'string' &&
+    Array.isArray(s.areas) &&
+    Array.isArray(s.places) &&
+    Array.isArray(s.lines)
+  );
 }

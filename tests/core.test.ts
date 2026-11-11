@@ -366,7 +366,7 @@ describe('data cleaning', () => {
     const [l] = cleanLines([{ id: 'bus:N1', ref: 'N1', name: 'N1', mode: 'bus', modeLabel: 'Nachtbus', coords: [straight], stops: [], center: { lat: 0.123456789, lon: 0 }, osmIds: [] }]);
     expect(l.coords[0]).toHaveLength(2);
     expect(l.center.lat).toBe(0.12346);
-    expect(isSnapshot({ version: 1, generated: 'x', attribution: '', places: [], lines: [] })).toBe(true);
+    expect(isSnapshot({ version: 1, generated: 'x', attribution: '', areas: [], places: [], lines: [] })).toBe(true);
     expect(isSnapshot({ version: 2 })).toBe(false);
   });
 });
