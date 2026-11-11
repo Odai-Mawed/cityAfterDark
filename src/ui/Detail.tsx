@@ -67,7 +67,7 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
       {place.demo ? <Text style={styles.demoNote}>Demo-Ort – frei erfunden, nicht real.</Text> : null}
       {place.highlight ? (
         <View style={styles.highlight}>
-          <Text style={styles.highlightTitle}>★ Berliner Institution</Text>
+          <Text style={styles.highlightTitle}>★ Berlin-Tipp</Text>
           <Text style={styles.highlightText}>{place.highlight}</Text>
         </View>
       ) : null}

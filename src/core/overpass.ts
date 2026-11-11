@@ -2,8 +2,10 @@ import { BERLIN_MODE_LABELS, bboxIntersectsBerlin, berlinProduct, isInBerlin } f
 import { CATEGORY_BY_ID, TRANSIT_MODE_LABELS, classify } from './categories';
 import type { BBox, CategoryId, LatLon, Place, Tags, TransitLine, TransitStop } from './types';
 
+// The main instance is often at capacity – several mirrors, tried in order.
 export const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];

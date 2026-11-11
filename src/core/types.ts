@@ -39,7 +39,7 @@ export interface Place {
   kind: string;
   tags: Tags;
   demo?: boolean;
-  /** Short description for curated Berlin venues ("Berliner Institution"). */
+  /** Short description for curated Berlin venues ("Berlin-Tipp"). */
   highlight?: string;
 }
 

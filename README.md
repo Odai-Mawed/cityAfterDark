@@ -38,9 +38,10 @@ Gebaut mit **React Native + Expo**: ein Code-Stand für **Android, iOS und Web**
   Ort zeigt seinen Ortsteil: aus `addr:suburb`, sonst vom nächstgelegenen Ortsteil-Mittelpunkt (Näherung).
 - **Clubs ohne Öffnungszeiten:** Viele Berliner Clubs veröffentlichen keine festen Zeiten. Sie werden deshalb
   standardmäßig mit „Öffnungszeiten unbekannt“ angezeigt. Das lässt sich im Filter abschalten.
-- **Berliner Institutionen (★):** 19 bekannte Clubs, Bars und Spätis (Berghain, Tresor, Sisyphos, ://about blank,
-  Destille, Klunkerkranich …). Die Auswahl stammt aus einer Web-Recherche, die Daten (Koordinaten, Adresse,
-  Öffnungszeiten) aus OpenStreetMap, Stand 10.11.2026, siehe `src/data/berlinHighlights.ts`. In den Live-Daten sind
+- **Berlin-Tipps (★):** 50 bekannte Orte: Clubs (Berghain, Tresor, Sisyphos …), Konzert-Clubs (SO36, Lido, Badehaus,
+  Cassiopeia …), Bars und Kneipen (Würgeengel, Ankerklause, Möbel Olfe, Kumpelnest 3000 …), späte Imbisse (Curry 36,
+  Rosenthaler Grill, Burgermeister …), Spätis und Kinos. Die Auswahl stammt aus einer Web-Recherche, die Daten
+  (Koordinaten, Adresse, Öffnungszeiten) aus OpenStreetMap, Stand 11.11.2026, siehe `src/data/berlinHighlights.ts`. In den Live-Daten sind
   diese Orte mit ★ und einer Kurzbeschreibung markiert. Ist Overpass nicht erreichbar, zeigt die App sie als
   „Offline-Auswahl“ statt erfundener Demo-Orte.
 - Feiertage werden nach Berliner Recht ausgewertet (z. B. Frauentag am 8. März).

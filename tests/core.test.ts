@@ -282,6 +282,9 @@ describe('berlin highlights (real OSM data)', () => {
     expect(places).toHaveLength(BERLIN_HIGHLIGHTS.length);
     expect(new Set(places.map((p) => p.id)).size).toBe(places.length);
     expect(places.every((p) => isInBerlin(p) && p.highlight && !p.demo)).toBe(true);
+    expect(places.length).toBeGreaterThanOrEqual(50);
+    const cats = new Set(places.map((p) => p.category));
+    for (const c of ['club', 'bar', 'spaeti', 'food', 'culture'] as const) expect(cats.has(c)).toBe(true);
   });
   it('are shown even without opening hours', async () => {
     const { highlightPlaces } = await import('../src/data/berlinHighlights');

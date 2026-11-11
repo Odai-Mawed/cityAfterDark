@@ -1,9 +1,9 @@
 // Kuratierte Auswahl echter Berliner Orte.
-// Auswahl: Web-Recherche (Nachtleben-Guides, Nov. 2026). Koordinaten, Adressen und
-// Öffnungszeiten: OpenStreetMap über Nominatim, abgerufen am 10.11.2026.
+// Auswahl: Web-Recherche (Nachtleben-, Bar-, Konzert-, Imbiss- und Queer-Guides, Nov. 2026). Koordinaten, Adressen und
+// Öffnungszeiten: OpenStreetMap über Nominatim, abgerufen am 10./11.11.2026.
 // © OpenStreetMap-Mitwirkende, ODbL. Beschreibungen: eigene Kurztexte.
 // Dient als Offline-Auswahl, wenn Overpass nicht erreichbar ist, und markiert
-// diese Orte in den Live-Daten als „Berliner Institution“.
+// diese Orte in den Live-Daten als „Berlin-Tipp“.
 import type { CategoryId, Place, Tags } from '../core/types';
 
 export interface Highlight {
@@ -14,7 +14,7 @@ export interface Highlight {
   highlight: string;
 }
 
-export const BERLIN_HIGHLIGHTS_DATE = '10.11.2026';
+export const BERLIN_HIGHLIGHTS_DATE = '11.11.2026';
 
 export const BERLIN_HIGHLIGHTS: Highlight[] = [
   {
@@ -372,6 +372,597 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:suburb": "Friedrichshain"
     },
     "highlight": "Späti in Friedrichshain, rund um die Uhr geöffnet."
+  },
+  {
+    "id": "node/30022140",
+    "lat": 52.493492,
+    "lon": 13.387687,
+    "tags": {
+      "cuisine": "sausage",
+      "smoking": "outside",
+      "wheelchair": "yes",
+      "opening_hours": "Mo-Su,PH 09:00-05:00",
+      "contact:website": "https://curry36.de/mehringdamm/",
+      "outdoor_seating": "sidewalk",
+      "name": "Curry 36",
+      "amenity": "fast_food",
+      "addr:street": "Mehringdamm",
+      "addr:housenumber": "36",
+      "addr:postcode": "10961",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Currywurst-Klassiker am Mehringdamm, laut OpenStreetMap täglich bis 5 Uhr früh."
+  },
+  {
+    "id": "node/7060011377",
+    "lat": 52.493449,
+    "lon": 13.388524,
+    "tags": {
+      "cuisine": "kebab",
+      "wheelchair": "yes",
+      "opening_hours": "Mo-Th 10:00-01:00, Fr 13:00-03:00, Sa 10:00-02:00, Su 10:00-01:00",
+      "contact:website": "http://www.mustafas.de",
+      "outdoor_seating": "no",
+      "name": "Mustafa's Gemüse Kebap",
+      "amenity": "fast_food",
+      "addr:street": "Mehringdamm",
+      "addr:housenumber": "33",
+      "addr:postcode": "10961",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Berühmter Gemüse-Kebap am Mehringdamm, oft mit langer Schlange."
+  },
+  {
+    "id": "node/997194070",
+    "lat": 52.490494,
+    "lon": 13.422942,
+    "tags": {
+      "phone": "+49 30 43027868",
+      "cuisine": "middle_eastern",
+      "wheelchair": "limited",
+      "opening_hours": "Mo-Su 08:00-02:00",
+      "outdoor_seating": "yes",
+      "name": "Imren Grill",
+      "amenity": "fast_food",
+      "addr:street": "Boppstraße",
+      "addr:housenumber": "10",
+      "addr:postcode": "10967",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Döner-Imbiss in Kreuzberg, laut OpenStreetMap täglich bis 2 Uhr."
+  },
+  {
+    "id": "node/2687685191",
+    "lat": 52.529842,
+    "lon": 13.400808,
+    "tags": {
+      "cuisine": "turkish",
+      "smoking": "no",
+      "wheelchair": "no",
+      "opening_hours": "24/7",
+      "outdoor_seating": "yes",
+      "name": "Rosenthaler Grill und Schlemmerbuffet",
+      "amenity": "fast_food",
+      "addr:street": "Torstraße",
+      "addr:housenumber": "125",
+      "addr:postcode": "10119",
+      "addr:suburb": "Mitte",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Imbiss am Rosenthaler Platz, rund um die Uhr geöffnet – Anlaufstelle nach dem Feiern."
+  },
+  {
+    "id": "node/1908183924",
+    "lat": 52.501121,
+    "lon": 13.442458,
+    "tags": {
+      "cuisine": "burger",
+      "smoking": "outside",
+      "wheelchair": "yes",
+      "opening_hours": "Mo-Th 11:00-03:00, Fr 11:00-04:00, Sa 12:00-04:00, Su 12:00-03:00",
+      "contact:website": "http://www.burger-meister.de",
+      "outdoor_seating": "yes",
+      "name": "Burgermeister",
+      "amenity": "fast_food",
+      "addr:street": "Oberbaumstraße",
+      "addr:housenumber": "8",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Burger-Imbiss in einem alten Toilettenhäuschen unter der U1 am Schlesischen Tor."
+  },
+  {
+    "id": "node/871610948",
+    "lat": 52.501083,
+    "lon": 13.416616,
+    "tags": {
+      "smoking": "no",
+      "wheelchair": "no",
+      "opening_hours": "Mo-Su,PH 19:00-03:00+",
+      "contact:website": "http://www.wuergeengel.de/",
+      "name": "Würgeengel",
+      "amenity": "pub",
+      "addr:street": "Dresdener Straße",
+      "addr:housenumber": "122",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Bar mit 50er-Jahre-Interieur neben dem Kino Babylon in Kreuzberg."
+  },
+  {
+    "id": "node/1190874905",
+    "lat": 52.484871,
+    "lon": 13.437557,
+    "tags": {
+      "wheelchair": "limited",
+      "outdoor_seating": "yes",
+      "name": "Tier",
+      "amenity": "pub",
+      "addr:street": "Weserstraße",
+      "addr:postcode": "12045",
+      "addr:suburb": "Neukölln",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Eine der bekanntesten Bars an der Weserstraße in Neukölln."
+  },
+  {
+    "id": "node/5352672812",
+    "lat": 52.497532,
+    "lon": 13.424177,
+    "tags": {
+      "smoking": "isolated",
+      "wheelchair": "no",
+      "name": "Bohnengold",
+      "amenity": "pub",
+      "addr:street": "Reichenberger Straße",
+      "addr:housenumber": "153",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Entspannte Wohnzimmer-Kneipe in der Reichenberger Straße."
+  },
+  {
+    "id": "node/2432755484",
+    "lat": 52.502204,
+    "lon": 13.432854,
+    "tags": {
+      "smoking": "yes",
+      "name": "Schwarze Traube",
+      "amenity": "bar",
+      "addr:street": "Wrangelstraße",
+      "addr:housenumber": "24",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Kleine Bar im Wrangelkiez, bekannt für Drinks nach Wunsch."
+  },
+  {
+    "id": "node/288468824",
+    "lat": 52.492721,
+    "lon": 13.421701,
+    "tags": {
+      "wheelchair": "no",
+      "opening_hours": "24/7",
+      "name": "Bei Schlawinchen",
+      "amenity": "pub",
+      "addr:street": "Schönleinstraße",
+      "addr:housenumber": "34",
+      "addr:postcode": "10967",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Urige Kreuzberger Kneipe, laut OpenStreetMap rund um die Uhr geöffnet."
+  },
+  {
+    "id": "node/616308956",
+    "lat": 52.500058,
+    "lon": 13.417443,
+    "tags": {
+      "lgbtq": "welcome",
+      "smoking": "yes",
+      "website": "https://www.moebel-olfe.de/",
+      "wheelchair": "yes",
+      "opening_hours": "Tu-Sa 18:00+",
+      "outdoor_seating": "yes",
+      "name": "Möbel Olfe",
+      "amenity": "bar",
+      "addr:street": "Reichenberger Straße",
+      "addr:housenumber": "177",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Queere Bar am Kottbusser Tor – laut Web-Quellen dienstags FLINTA*-, donnerstags Gay-Abend."
+  },
+  {
+    "id": "node/4034138654",
+    "lat": 52.500536,
+    "lon": 13.421642,
+    "tags": {
+      "lgbtq": "welcome",
+      "phone": "+49 30 6156570",
+      "smoking": "no",
+      "wheelchair": "no",
+      "name": "Roses Bar",
+      "amenity": "bar",
+      "addr:street": "Oranienstraße",
+      "addr:housenumber": "187",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Kleine, plüschige queere Bar an der Oranienstraße."
+  },
+  {
+    "id": "way/65425822",
+    "lat": 52.498545,
+    "lon": 13.416795,
+    "tags": {
+      "lgbtq": "welcome",
+      "phone": "+49 30 60941853",
+      "cuisine": "salad;german;burger",
+      "smoking": "isolated",
+      "website": "https://www.suedblock.org/",
+      "wheelchair": "yes",
+      "opening_hours": "Mo-Sa 17:00-23:00; Su 15:00-23:00",
+      "contact:website": "http://www.suedblock.org",
+      "outdoor_seating": "yes",
+      "name": "Südblock",
+      "amenity": "bar",
+      "addr:street": "Admiralstraße",
+      "addr:housenumber": "1-2",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Queere Bar und Kiez-Treff am Kottbusser Tor mit Terrasse und vielen Veranstaltungen."
+  },
+  {
+    "id": "node/1589659413",
+    "lat": 52.503083,
+    "lon": 13.366354,
+    "tags": {
+      "smoking": "yes",
+      "website": "http://kumpelnest3000.com/",
+      "wheelchair": "no",
+      "outdoor_seating": "yes",
+      "name": "Kumpelnest 3000",
+      "amenity": "bar",
+      "addr:street": "Lützowstraße",
+      "addr:postcode": "10785",
+      "addr:suburb": "Tiergarten",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Legendäre Bar in einem ehemaligen Bordell in Tiergarten, ab spät abends voll."
+  },
+  {
+    "id": "node/9673939669",
+    "lat": 52.49961,
+    "lon": 13.437406,
+    "tags": {
+      "phone": "+493098442730",
+      "website": "https://madameclaude.de/",
+      "wheelchair": "no",
+      "name": "Madame Claude",
+      "amenity": "pub",
+      "addr:street": "Lübbener Straße",
+      "addr:housenumber": "19",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Bar, in der die Möbel an der Decke hängen, mit Konzerten und Open Mics."
+  },
+  {
+    "id": "way/150186494",
+    "lat": 52.495823,
+    "lon": 13.420585,
+    "tags": {
+      "cuisine": "fish;german",
+      "smoking": "isolated",
+      "wheelchair": "limited",
+      "opening_hours": "Mo-Th 10:00-03:00, Fr,Sa 10:00-04:00, Su 10:00-01:00",
+      "contact:website": "http://www.ankerklause.de/",
+      "outdoor_seating": "yes",
+      "name": "Ankerklause",
+      "amenity": "pub",
+      "addr:street": "Kottbusser Damm",
+      "addr:housenumber": "104",
+      "addr:postcode": "10967",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Kneipe am Landwehrkanal mit Blick aufs Wasser, bis 3–4 Uhr geöffnet."
+  },
+  {
+    "id": "node/1394776930",
+    "lat": 52.508947,
+    "lon": 13.460623,
+    "tags": {
+      "smoking": "separated",
+      "wheelchair": "no",
+      "opening_hours": "Mo-Th 17:00-01:00, Sa,Su 14:00+, Fr 16:00+",
+      "contact:website": "http://hopsandbarley-berlin.de/",
+      "outdoor_seating": "yes",
+      "name": "Hops & Barley",
+      "amenity": "pub",
+      "addr:street": "Wühlischstraße",
+      "addr:housenumber": "22/23",
+      "addr:postcode": "10245",
+      "addr:suburb": "Friedrichshain",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Kleine Hausbrauerei-Kneipe im Boxhagener Kiez."
+  },
+  {
+    "id": "node/955932511",
+    "lat": 52.501249,
+    "lon": 13.431629,
+    "tags": {
+      "website": "https://www.pyonen.de/tantelisbeth/",
+      "wheelchair": "limited",
+      "opening_hours": "Mo-Fr 16:00-02:00+, Sa,Su 14:00-02:00+",
+      "outdoor_seating": "no",
+      "name": "Tante Lisbeth",
+      "amenity": "pub",
+      "addr:street": "Muskauer Straße",
+      "addr:housenumber": "49",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Kreuzberger Eckkneipe in der Muskauer Straße."
+  },
+  {
+    "id": "node/1108168284",
+    "lat": 52.499275,
+    "lon": 13.419472,
+    "tags": {
+      "smoking": "yes",
+      "wheelchair": "no",
+      "contact:website": "http://www.kottimonarch.de/",
+      "outdoor_seating": "no",
+      "name": "Monarch",
+      "amenity": "pub",
+      "addr:street": "Skalitzer Straße",
+      "addr:housenumber": "134",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Bar über dem Kaiser's am Kottbusser Tor mit Konzerten und Partys."
+  },
+  {
+    "id": "node/4034138645",
+    "lat": 52.500391,
+    "lon": 13.422161,
+    "tags": {
+      "smoking": "isolated",
+      "live_music": "yes",
+      "wheelchair": "yes",
+      "opening_hours": "\"Je nach Programm\"",
+      "contact:website": "https://www.so36.de",
+      "name": "SO36",
+      "amenity": "nightclub",
+      "addr:street": "Oranienstraße",
+      "addr:housenumber": "190",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Punk- und Konzertclub an der Oranienstraße, seit 1978 Teil der Kreuzberger Szene."
+  },
+  {
+    "id": "node/360111407",
+    "lat": 52.499217,
+    "lon": 13.445075,
+    "tags": {
+      "smoking": "isolated",
+      "live_music": "yes",
+      "wheelchair": "yes",
+      "contact:website": "https://www.lido-berlin.de/",
+      "name": "Lido",
+      "amenity": "nightclub",
+      "addr:street": "Cuvrystraße",
+      "addr:housenumber": "7",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Ehemaliges Kino an der Cuvrystraße, heute Club für Indie- und Rock-Konzerte."
+  },
+  {
+    "id": "way/123019464",
+    "lat": 52.507582,
+    "lon": 13.45515,
+    "tags": {
+      "wheelchair": "limited",
+      "contact:website": "http://www.badehaus-berlin.com/",
+      "name": "Badehaus",
+      "amenity": "nightclub",
+      "addr:street": "Revaler Straße",
+      "addr:housenumber": "99",
+      "addr:postcode": "10245",
+      "addr:suburb": "Friedrichshain",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Konzert- und Clubbühne auf dem RAW-Gelände."
+  },
+  {
+    "id": "way/684464913",
+    "lat": 52.507245,
+    "lon": 13.454789,
+    "tags": {
+      "live_music": "yes",
+      "wheelchair": "limited",
+      "contact:website": "https://cassiopeia-berlin.de/",
+      "name": "Cassiopeia",
+      "amenity": "nightclub",
+      "addr:street": "Revaler Straße",
+      "addr:housenumber": "99",
+      "addr:postcode": "10245",
+      "addr:suburb": "Friedrichshain",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Konzertclub mit Partys auf dem RAW-Gelände."
+  },
+  {
+    "id": "node/1667559178",
+    "lat": 52.500756,
+    "lon": 13.441461,
+    "tags": {
+      "leisure": "music_venue",
+      "website": "http://www.bi-nuu.de/",
+      "wheelchair": "yes",
+      "name": "Bi Nuu",
+      "amenity": "nightclub",
+      "addr:street": "Skalitzer Straße",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Konzertclub in den Bögen am U-Bahnhof Schlesisches Tor."
+  },
+  {
+    "id": "way/277805717",
+    "lat": 52.496823,
+    "lon": 13.451556,
+    "tags": {
+      "phone": "+49 30 403655630",
+      "smoking": "outside",
+      "website": "https://www.festsaal-kreuzberg.de/",
+      "wheelchair": "yes",
+      "name": "Festsaal Kreuzberg",
+      "amenity": "nightclub",
+      "addr:street": "Am Flutgraben",
+      "addr:housenumber": "2",
+      "addr:postcode": "12435",
+      "addr:suburb": "Alt-Treptow",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Konzert-Venue, inzwischen am Flutgraben in Treptow."
+  },
+  {
+    "id": "node/2147941967",
+    "lat": 52.500071,
+    "lon": 13.434849,
+    "tags": {
+      "phone": "+49 30 35522598",
+      "amenity": "music_venue",
+      "wheelchair": "yes",
+      "contact:website": "http://www.privatclub-berlin.de",
+      "name": "Privatclub",
+      "leisure": "music_venue",
+      "addr:street": "Skalitzer Straße",
+      "addr:housenumber": "85-86",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Kleiner Konzertkeller in der Skalitzer Straße."
+  },
+  {
+    "id": "node/410135945",
+    "lat": 52.497469,
+    "lon": 13.431097,
+    "tags": {
+      "website": "http://wildatheartberlin.de",
+      "wheelchair": "no",
+      "opening_hours": "\"When they host a concert, doors opens at 20h. Otherwise they are closed\"",
+      "name": "Wild at Heart",
+      "amenity": "nightclub",
+      "addr:street": "Wiener Straße",
+      "addr:postcode": "10999",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin",
+      "live_music": "yes"
+    },
+    "highlight": "Rock'n'Roll- und Punk-Bar mit Konzerten in der Wiener Straße."
+  },
+  {
+    "id": "node/1370001597",
+    "lat": 52.5033,
+    "lon": 13.408727,
+    "tags": {
+      "smoking": "yes",
+      "wheelchair": "yes",
+      "contact:website": "https://www.princecharlesberlin.com/",
+      "name": "Prince Charles",
+      "amenity": "nightclub",
+      "addr:street": "Prinzenstraße",
+      "addr:housenumber": "85f",
+      "addr:postcode": "10969",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Club in einem ehemaligen Schwimmbad am Moritzplatz."
+  },
+  {
+    "id": "node/256754256",
+    "lat": 52.525899,
+    "lon": 13.411436,
+    "tags": {
+      "wheelchair": "limited",
+      "opening_hours": "Mo-Fr 17:00+; Sa,Su \"eine halbe Stunde vor der ersten Vorstellung\"",
+      "contact:website": "http://www.babylonberlin.de",
+      "name": "Babylon",
+      "amenity": "cinema",
+      "addr:street": "Rosa-Luxemburg-Straße",
+      "addr:housenumber": "30",
+      "addr:postcode": "10178",
+      "addr:suburb": "Mitte",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Programmkino am Rosa-Luxemburg-Platz mit Spätvorstellungen."
+  },
+  {
+    "id": "node/448811295",
+    "lat": 52.490334,
+    "lon": 13.423401,
+    "tags": {
+      "phone": "+49 30 6924785",
+      "website": "https://www.moviemento.de/",
+      "wheelchair": "no",
+      "name": "Moviemento",
+      "amenity": "cinema",
+      "addr:street": "Kottbusser Damm",
+      "addr:housenumber": "22",
+      "addr:postcode": "10967",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Ältestes noch bespieltes Kino Berlins, am Kottbusser Damm."
+  },
+  {
+    "id": "way/24240975",
+    "lat": 52.520682,
+    "lon": 13.423045,
+    "tags": {
+      "wheelchair": "yes",
+      "opening_hours": "\"30 minutes before first screening\"",
+      "contact:website": "https://yorck.de/kinos/kino-international",
+      "name": "Kino International",
+      "amenity": "cinema",
+      "addr:street": "Karl-Marx-Allee",
+      "addr:housenumber": "33",
+      "addr:postcode": "10178",
+      "addr:suburb": "Mitte",
+      "addr:city": "Berlin"
+    },
+    "highlight": "DDR-Premierenkino an der Karl-Marx-Allee."
   }
 ];
 
