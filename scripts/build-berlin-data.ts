@@ -50,11 +50,11 @@ function tiles(b: BBox, n: number): BBox[] {
   return out;
 }
 
-async function fetchTile(bbox: BBox, categories: CategoryId[], label: string): Promise<OsmElement[] | null> {
+async function fetchTile(bbox: BBox, categories: CategoryId[], label: string, prefer = 0): Promise<OsmElement[] | null> {
   const query = buildQuery(bbox, categories, 90);
   let wait = 15_000;
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
-    const endpoint = ENDPOINTS[(attempt - 1) % ENDPOINTS.length];
+    const endpoint = ENDPOINTS[(prefer + attempt - 1) % ENDPOINTS.length];
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -87,25 +87,36 @@ async function main() {
   const seen = new Set<string>();
   const areas: BBox[] = [];
   const list = tiles(BERLIN_BBOX, GRID);
-  for (const [i, t] of list.entries()) {
-    let complete = true;
-    for (const group of GROUPS) {
-      const els = await fetchTile(t, group, `Kachel ${i + 1}/${list.length} [${group.join(',')}]`);
-      if (!els) {
-        complete = false;
-        continue;
+  // One worker per mirror (never more than one request at a time per server);
+  // a failing request is retried on the next mirror.
+  const jobs = list.flatMap((t, i) => GROUPS.map((group) => ({ t, i, group })));
+  const failedTiles = new Set<number>();
+  let next = 0;
+  const WORKERS = Math.min(3, ENDPOINTS.length);
+  await Promise.all(
+    Array.from({ length: WORKERS }, async (_, w) => {
+      while (next < jobs.length) {
+        const job = jobs[next++];
+        const label = `Kachel ${job.i + 1}/${list.length} [${job.group.join(',')}]`;
+        const els = await fetchTile(job.t, job.group, label, w);
+        if (!els) {
+          failedTiles.add(job.i);
+          continue;
+        }
+        for (const el of els) {
+          // relations appear in several tiles with differently clipped geometry – keep all of them
+          const key = `${el.type}/${el.id}`;
+          if (el.type !== 'relation' && seen.has(key)) continue;
+          seen.add(key);
+          elements.push(el);
+        }
+        await sleep(2000); // be nice to the public servers
       }
-      for (const el of els) {
-        // relations appear in several tiles with differently clipped geometry – keep all of them
-        const key = `${el.type}/${el.id}`;
-        if (el.type !== 'relation' && seen.has(key)) continue;
-        seen.add(key);
-        elements.push(el);
-      }
-      await sleep(2000); // be nice to the public servers
-    }
-    if (complete) areas.push(t);
-  }
+    }),
+  );
+  list.forEach((t, i) => {
+    if (!failedTiles.has(i)) areas.push(t);
+  });
 
   // a mostly empty snapshot would hide live data – rather keep the old one
   if (areas.length < list.length / 2) {
