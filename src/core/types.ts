@@ -41,6 +41,8 @@ export interface Place {
   demo?: boolean;
   /** Short description for curated Berlin venues ("Berlin-Tipp"). */
   highlight?: string;
+  /** Club page on Resident Advisor (programme and tickets). */
+  ra?: string;
 }
 
 export interface TransitStop extends LatLon {

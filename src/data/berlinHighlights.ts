@@ -1,5 +1,6 @@
 // Kuratierte Auswahl echter Berliner Orte.
-// Auswahl: Web-Recherche (Nachtleben-, Bar-, Konzert-, Imbiss- und Queer-Guides, Nov. 2026). Koordinaten, Adressen und
+// Auswahl: Web-Recherche (Nachtleben-, Bar-, Konzert-, Imbiss- und Queer-Guides sowie Resident Advisor, Nov. 2026).
+// Club-Beschreibungen teils nach Angaben von RA (ra.co), in eigenen Worten. Koordinaten, Adressen und
 // Öffnungszeiten: OpenStreetMap über Nominatim, abgerufen am 10./11.11.2026.
 // © OpenStreetMap-Mitwirkende, ODbL. Beschreibungen: eigene Kurztexte.
 // Dient als Offline-Auswahl, wenn Overpass nicht erreichbar ist, und markiert
@@ -12,6 +13,8 @@ export interface Highlight {
   lon: number;
   tags: Tags;
   highlight: string;
+  /** Club page on Resident Advisor (programme, tickets). */
+  ra?: string;
 }
 
 export const BERLIN_HIGHLIGHTS_DATE = '11.11.2026';
@@ -33,7 +36,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Friedrichshain"
     },
-    "highlight": "Techno-Institution im ehemaligen Heizkraftwerk. Die Klubnacht läuft laut Web-Quellen meist von Samstag 24 Uhr bis Montagfrüh, strenge Tür."
+    "highlight": "Techno-Institution im ehemaligen Heizkraftwerk mit drei Floors (Berghain, Panorama Bar, Säule). Die Klubnacht läuft meist von Samstag 24 Uhr bis Montagfrüh; strenge Tür, Fotoverbot.",
+    "ra": "https://ra.co/clubs/5031"
   },
   {
     "id": "node/4870128450",
@@ -52,7 +56,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Mitte"
     },
-    "highlight": "Techno-Klassiker seit 1991, heute im Kraftwerk an der Köpenicker Straße."
+    "highlight": "Techno-Klassiker seit 1991 im Kraftwerk an der Köpenicker Straße – mit dem Tresor-Keller und dem musikalisch offeneren Globus.",
+    "ra": "https://ra.co/clubs/5494"
   },
   {
     "id": "node/2876098523",
@@ -69,7 +74,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Mitte"
     },
-    "highlight": "Kleiner Club im ehemaligen Umspannwerk, direkt neben dem Tresor."
+    "highlight": "Kleiner Club im ehemaligen Batterieraum des Kraftwerks, direkt neben dem Tresor.",
+    "ra": "https://ra.co/clubs/75457"
   },
   {
     "id": "way/148829988",
@@ -88,7 +94,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Rummelsburg"
     },
-    "highlight": "Weitläufiges Club-Gelände in einer alten Fabrik am Rummelsburger See, oft von Freitagnacht bis Montag."
+    "highlight": "Weitläufiges Gelände in einer alten Fabrik am Rummelsburger See mit Halle und Garten. Partys oft von Freitagnacht bis Montag, Line-ups werden fast nie angekündigt.",
+    "ra": "https://ra.co/clubs/17118"
   },
   {
     "id": "way/293386107",
@@ -106,7 +113,7 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Friedrichshain"
     },
-    "highlight": "Club mit Spreeufer auf dem Holzmarkt-Gelände."
+    "highlight": "Club an der Spree auf dem Holzmarkt-Gelände, heißt inzwischen nur noch „Kater“: House-, Techno- und Leftfield-Floors plus Terrasse am Wasser."
   },
   {
     "id": "node/729294555",
@@ -125,7 +132,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Mitte"
     },
-    "highlight": "Bekannter Fetisch- und Techno-Club – Dresscode beachten."
+    "highlight": "Fetisch- und Techno-Club gleich um die Ecke vom Tresor – Dresscode beachten.",
+    "ra": "https://ra.co/clubs/10546"
   },
   {
     "id": "node/979969868",
@@ -144,7 +152,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Kreuzberg"
     },
-    "highlight": "Club in einer alten Fabrik in Kreuzberg, laut Web-Quellen meist Fr & Sa ab 18 Uhr bis in den Morgen."
+    "highlight": "Club im Erdgeschoss einer alten Fabrik in Kreuzberg, meist Fr & Sa bis in den Morgen.",
+    "ra": "https://ra.co/clubs/6950"
   },
   {
     "id": "way/232536532",
@@ -180,7 +189,7 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Lichtenberg"
     },
-    "highlight": "Techno-Club in Lichtenberg, nah am Ostkreuz."
+    "highlight": "Club nahe Ostkreuz (früheres Kosmonaut-Gelände), bekannt für experimentelle Bookings, queer-freundlich, im Sommer mit Terrasse."
   },
   {
     "id": "node/8069721818",
@@ -216,7 +225,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Friedrichshain"
     },
-    "highlight": "Kollektiv-Club mit Garten am Ostkreuz, Zeiten je nach Veranstaltung."
+    "highlight": "Kollektiv-Club mit Garten am Ostkreuz in einem umgenutzten Gebäude, vor allem House und Techno.",
+    "ra": "https://ra.co/clubs/28354"
   },
   {
     "id": "way/36908987",
@@ -254,7 +264,8 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin",
       "addr:suburb": "Friedrichshain"
     },
-    "highlight": "Großer Club in den Bögen unter dem Bahnhof Warschauer Straße."
+    "highlight": "Großer Club in den Bögen unter dem Bahnhof Warschauer Straße.",
+    "ra": "https://ra.co/clubs/49006"
   },
   {
     "id": "node/891502072",
@@ -963,6 +974,98 @@ export const BERLIN_HIGHLIGHTS: Highlight[] = [
       "addr:city": "Berlin"
     },
     "highlight": "DDR-Premierenkino an der Karl-Marx-Allee."
+  },
+  {
+    "id": "way/291111616",
+    "lat": 52.497313,
+    "lon": 13.449516,
+    "tags": {
+      "website": "http://aedenberlin.com",
+      "wheelchair": "no",
+      "opening_hours": "Tu 22:00-08:00; Th 22:00-08:00; Fr 22:00-10:00; Sa 18:00-10:00",
+      "name": "ÆDEN",
+      "amenity": "nightclub",
+      "addr:street": "Schleusenufer",
+      "addr:housenumber": "3",
+      "addr:postcode": "10997",
+      "addr:suburb": "Kreuzberg",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Club auf der Lohmühleninsel in Kreuzberg mit zwei Indoor-Floors, im Sommer mit Open-Air-Floor; Live-Musik, Kunst und Performance.",
+    "ra": "https://ra.co/clubs/187744"
+  },
+  {
+    "id": "way/23787721",
+    "lat": 52.487314,
+    "lon": 13.477479,
+    "tags": {
+      "website": "https://zenner.berlin",
+      "name": "Zenner",
+      "amenity": "nightclub",
+      "addr:street": "Alt-Treptow",
+      "addr:housenumber": "14-17",
+      "addr:postcode": "12435",
+      "addr:suburb": "Alt-Treptow",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Club mitten im Treptower Park mit zwei Floors und großem Außenbereich.",
+    "ra": "https://ra.co/clubs/188239"
+  },
+  {
+    "id": "node/11804553537",
+    "lat": 52.459911,
+    "lon": 13.505335,
+    "tags": {
+      "website": "https://www.reviersuedost.de",
+      "live_music": "yes",
+      "wheelchair": "limited",
+      "name": "RSO.Berlin",
+      "amenity": "nightclub",
+      "addr:street": "Schnellerstraße",
+      "addr:postcode": "12439",
+      "addr:suburb": "Niederschöneweide",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Mehrräumiger Club in Schöneweide auf dem früheren Griessmühle-Gelände, seit 2021."
+  },
+  {
+    "id": "way/45001954",
+    "lat": 52.50717,
+    "lon": 13.451077,
+    "tags": {
+      "smoking": "yes",
+      "website": "https://www.lokschuppen-berlin.com/",
+      "wheelchair": "limited",
+      "name": "Lokschuppen",
+      "amenity": "nightclub",
+      "addr:street": "Revaler Straße",
+      "addr:housenumber": "99",
+      "addr:postcode": "10245",
+      "addr:suburb": "Friedrichshain",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Großer Veranstaltungsort im alten Lokschuppen auf dem RAW-Gelände.",
+    "ra": "https://ra.co/clubs/293771"
+  },
+  {
+    "id": "node/485640732",
+    "lat": 52.49739,
+    "lon": 13.465307,
+    "tags": {
+      "smoking": "yes",
+      "wheelchair": "no",
+      "opening_hours": "Th 18:00+; Fr 16:00+; Sa 14:00+",
+      "contact:website": "https://www.renate.cc",
+      "outdoor_seating": "yes",
+      "name": "Zur Wilden Renate",
+      "amenity": "nightclub",
+      "addr:street": "Alt-Stralau",
+      "addr:housenumber": "70",
+      "addr:postcode": "10245",
+      "addr:suburb": "Friedrichshain",
+      "addr:city": "Berlin"
+    },
+    "highlight": "Club in einem verwinkelten Altbau in Alt-Stralau, Wohnzimmer-Atmosphäre auf mehreren Etagen. RA führt ihn als „Renate“."
   }
 ];
 
@@ -971,9 +1074,9 @@ export function highlightPlaces(classify: (tags: Tags) => { category: CategoryId
   return BERLIN_HIGHLIGHTS.flatMap((h): Place[] => {
     const cls = classify(h.tags);
     return cls
-      ? [{ id: h.id, lat: h.lat, lon: h.lon, name: h.tags.name ?? cls.kind, category: cls.category, kind: cls.kind, tags: h.tags, highlight: h.highlight }]
+      ? [{ id: h.id, lat: h.lat, lon: h.lon, name: h.tags.name ?? cls.kind, category: cls.category, kind: cls.kind, tags: h.tags, highlight: h.highlight, ra: h.ra }]
       : [];
   });
 }
 
-export const HIGHLIGHT_BY_ID = new Map(BERLIN_HIGHLIGHTS.map((h) => [h.id, h.highlight]));
+export const HIGHLIGHT_BY_ID = new Map(BERLIN_HIGHLIGHTS.map((h) => [h.id, h]));

@@ -282,7 +282,10 @@ describe('berlin highlights (real OSM data)', () => {
     expect(places).toHaveLength(BERLIN_HIGHLIGHTS.length);
     expect(new Set(places.map((p) => p.id)).size).toBe(places.length);
     expect(places.every((p) => isInBerlin(p) && p.highlight && !p.demo)).toBe(true);
-    expect(places.length).toBeGreaterThanOrEqual(50);
+    expect(places.length).toBeGreaterThanOrEqual(55);
+    const withRa = places.filter((p) => p.ra);
+    expect(withRa.length).toBeGreaterThanOrEqual(10);
+    expect(withRa.every((p) => /^https:\/\/ra\.co\/clubs\/\d+$/.test(p.ra!) && p.category === 'club')).toBe(true);
     const cats = new Set(places.map((p) => p.category));
     for (const c of ['club', 'bar', 'spaeti', 'food', 'culture'] as const) expect(cats.has(c)).toBe(true);
   });

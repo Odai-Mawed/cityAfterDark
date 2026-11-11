@@ -124,8 +124,8 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
       setSnapshot(isInBerlin(demoCenter.current) ? { places: highlightPlaces(classify), lines: [] } : generateDemo(demoCenter.current));
     } else {
       const live = [...places.current.values()].map((p) => {
-        const highlight = HIGHLIGHT_BY_ID.get(p.id);
-        return highlight ? { ...p, highlight } : p;
+        const h = HIGHLIGHT_BY_ID.get(p.id);
+        return h ? { ...p, highlight: h.highlight, ra: h.ra } : p;
       });
       // In Berlin the curated real venues show up right away, before (or
       // without) a live answer from Overpass.

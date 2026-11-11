@@ -117,6 +117,7 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
 
       <View style={styles.actions}>
         <Action label="Route" icon="🧭" primary onPress={() => open(directionsUrl(place, place.name))} />
+        {place.ra ? <Action label="Programm auf RA" icon="🎟" onPress={() => open(place.ra!)} /> : null}
         {website ? <Action label="Website" icon="🌐" onPress={() => open(website)} /> : null}
         {phone ? <Action label="Anrufen" icon="📞" onPress={() => open(`tel:${phone.split(/[;,]/)[0].replace(/\s/g, '')}`)} /> : null}
         {!place.demo ? (
