@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { isInBerlin } from '../core/berlin';
-import { classify } from '../core/categories';
+import { Platform } from 'react-native';
+import { BERLIN_BBOX, isInBerlin } from '../core/berlin';
+import { CATEGORIES, classify } from '../core/categories';
+import { isSnapshot } from '../core/clean';
 import { generateDemo } from '../core/demo';
 import { BERLIN_FUEL } from '../data/berlinFuel';
 import { HIGHLIGHT_BY_ID, highlightPlaces } from '../data/berlinHighlights';
@@ -15,6 +17,17 @@ function berlinBaseline(): Place[] {
   return [...highlightPlaces(classify), ...BERLIN_FUEL];
 }
 const MAX_BBOX_DEG = 0.22;
+
+/**
+ * Daily cleaned Berlin snapshot (scripts/build-berlin-data.ts), served next to
+ * the web app. Native apps load it from the deployed site.
+ */
+const SNAPSHOT_URL =
+  process.env.EXPO_PUBLIC_DATA_URL ??
+  (Platform.OS === 'web' ? 'data/berlin.json' : 'https://cityafterdark.netlify.app/data/berlin.json');
+/** Older snapshots are ignored – then live data from Overpass is used. */
+const SNAPSHOT_MAX_AGE_DAYS = 7;
+type SnapshotState = 'idle' | 'loading' | 'done' | 'failed';
 const DEBOUNCE_MS = 700;
 const PRUNE_KM = 40;
 
@@ -33,6 +46,8 @@ export interface NightlifeData {
   demo: boolean;
   /** Offline mode shows the curated real Berlin venues instead of fictional demo data. */
   curated: boolean;
+  /** Timestamp of the Berlin snapshot in use, if any. */
+  snapshotDate: Date | null;
   setDemo: (on: boolean) => void;
   retry: () => void;
 }
@@ -50,9 +65,39 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
 
   const catsKey = [...categories].sort().join(',');
   const inBerlinView = !!region && isInBerlin(region.center);
+  const [snapState, setSnapState] = useState<SnapshotState>('idle');
+  const [snapshotDate, setSnapshotDate] = useState<Date | null>(null);
+
+  // Inside Berlin: load the prepared snapshot once. It covers all categories
+  // for the whole city, so no Overpass request is needed there.
+  useEffect(() => {
+    if (!inBerlinView || snapState !== 'idle') return;
+    setSnapState('loading');
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000);
+    fetch(SNAPSHOT_URL, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((snap: unknown) => {
+        if (!isSnapshot(snap)) throw new Error('Unbekanntes Format');
+        const generated = new Date(snap.generated);
+        if (Date.now() - generated.getTime() > SNAPSHOT_MAX_AGE_DAYS * 86400000) throw new Error('Veraltet');
+        for (const p of snap.places) places.current.set(p.id, p);
+        for (const l of snap.lines) lines.current.set(l.id, l);
+        loaded.current.push({ bbox: BERLIN_BBOX, categories: new Set(CATEGORIES.map((c) => c.id)) });
+        setSnapshotDate(generated);
+        setSnapState('done');
+        setError(null);
+        setStatus('idle');
+        setVersion((v) => v + 1);
+      })
+      .catch(() => setSnapState('failed'))
+      .finally(() => clearTimeout(timer));
+  }, [inBerlinView, snapState]);
 
   useEffect(() => {
     if (!region || demo) return;
+    // wait for the Berlin snapshot before asking Overpass
+    if (inBerlinView && (snapState === 'idle' || snapState === 'loading')) return;
     if (region.zoom < MIN_ZOOM) {
       setStatus('zoom');
       return;
@@ -107,7 +152,7 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
       ctrl.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [region, catsKey, demo, retryNonce]);
+  }, [region, catsKey, demo, retryNonce, snapState]);
 
   const setDemo = useCallback(
     (on: boolean) => {
@@ -141,5 +186,14 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
   }, [version, demo, inBerlinView]);
 
   const curated = demo && !!demoCenter.current && isInBerlin(demoCenter.current);
-  return { ...snapshot, status: demo ? 'idle' : status, error: demo ? null : error, demo, curated, setDemo, retry };
+  return {
+    ...snapshot,
+    status: demo ? 'idle' : status,
+    error: demo ? null : error,
+    demo,
+    curated,
+    snapshotDate: demo ? null : snapshotDate,
+    setDemo,
+    retry,
+  };
 }

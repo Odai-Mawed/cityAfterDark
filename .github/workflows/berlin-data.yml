@@ -1,0 +1,58 @@
+name: Berlin-Daten & Deploy
+
+# Holt jeden Morgen die Berliner Nachtleben-Daten aus OpenStreetMap,
+# bereinigt sie (scripts/build-berlin-data.ts), baut die Web-App und
+# deployt sie auf Netlify.
+#
+# Benötigte Repository-Secrets (Settings → Secrets and variables → Actions):
+#   NETLIFY_AUTH_TOKEN  – Netlify Personal Access Token
+#   NETLIFY_SITE_ID     – ID der Netlify-Site (Site configuration → Site ID)
+# Ohne Secrets läuft alles bis auf das Deployment; die Daten liegen dann als
+# Artefakt am Workflow-Lauf.
+
+on:
+  schedule:
+    - cron: '23 3 * * *' # täglich 03:23 UTC (04:23/05:23 Berliner Zeit)
+  workflow_dispatch:
+  push:
+    branches: [main, claude/quirky-clarke-3bbwcl]
+    paths:
+      - 'scripts/build-berlin-data.ts'
+      - 'src/**'
+      - 'App.tsx'
+      - '.github/workflows/berlin-data.yml'
+
+concurrency:
+  group: berlin-data
+  cancel-in-progress: false
+
+jobs:
+  data-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Berlin-Daten aus OpenStreetMap holen und bereinigen
+        run: npm run data:berlin
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: berlin-data
+          path: public/data/berlin.json
+          retention-days: 7
+
+      - name: Web-App bauen
+        run: npx expo export --platform web
+
+      - name: Auf Netlify deployen
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: npx --yes netlify-cli@27.14.2 deploy --prod --dir dist --site "$NETLIFY_SITE_ID" --message "Berlin-Daten $(date -u +%F)"

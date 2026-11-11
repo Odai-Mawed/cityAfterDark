@@ -331,3 +331,42 @@ describe('berlin fuel stations (real OSM data)', () => {
     expect(filterPlaces(open24, { ...DEFAULT_FILTERS, categories: ['fuel'] }, sat3, open24[0])).toHaveLength(open24.length);
   });
 });
+
+describe('data cleaning', () => {
+  const now = new Date(2026, 10, 11, 12, 0); // Wed noon
+  const mk = (tags: Record<string, string>, id = Math.random().toString()) => place(tags, { id: `node/${id}` });
+
+  it('drops places that do not open in the next two weeks', async () => {
+    const { cleanPlaces } = await import('../src/core/clean');
+    const open = mk({ amenity: 'bar', name: 'Offen', opening_hours: 'Mo-Su 18:00-02:00' });
+    const closed = mk({ amenity: 'bar', name: 'Zu', opening_hours: 'off' });
+    const unknown = mk({ amenity: 'bar', name: 'Unklar' });
+    const r = cleanPlaces([open, closed, unknown, open], now);
+    expect(r.places.map((p) => p.name)).toEqual(['Offen', 'Unklar']);
+    expect(r.stats).toMatchObject({ input: 4, notOpening: 1, output: 2 });
+  });
+
+  it('keeps food and supermarkets only when they are open late', async () => {
+    const { cleanPlaces, isLateNight } = await import('../src/core/clean');
+    const lunch = mk({ amenity: 'restaurant', name: 'Mittag', opening_hours: 'Mo-Fr 11:00-15:00' });
+    const doner = mk({ amenity: 'fast_food', name: 'Döner', opening_hours: 'Mo-Su 11:00-03:00' });
+    const market = mk({ shop: 'supermarket', name: 'Markt', opening_hours: 'Mo-Sa 07:00-22:00' });
+    const lateMarket = mk({ shop: 'supermarket', name: 'Spätmarkt', opening_hours: 'Mo-Sa 07:00-24:00' });
+    expect(isLateNight(doner.tags, now)).toBe(true);
+    const r = cleanPlaces([lunch, doner, market, lateMarket], now);
+    expect(r.places.map((p) => p.name)).toEqual(['Döner', 'Spätmarkt']);
+  });
+
+  it('trims tags and simplifies lines', async () => {
+    const { trimTags, simplify, cleanLines, isSnapshot } = await import('../src/core/clean');
+    expect(trimTags({ name: 'X', amenity: 'bar', 'source:date': '2020', fixme: 'y' })).toEqual({ name: 'X', amenity: 'bar' });
+    const straight: [number, number][] = [[0, 0], [0.00001, 0.5], [0, 1]];
+    expect(simplify(straight, 0.0001)).toEqual([[0, 0], [0, 1]]);
+    expect(simplify([[0, 0], [0.1, 0.5], [0, 1]], 0.0001)).toHaveLength(3);
+    const [l] = cleanLines([{ id: 'bus:N1', ref: 'N1', name: 'N1', mode: 'bus', modeLabel: 'Nachtbus', coords: [straight], stops: [], center: { lat: 0.123456789, lon: 0 }, osmIds: [] }]);
+    expect(l.coords[0]).toHaveLength(2);
+    expect(l.center.lat).toBe(0.12346);
+    expect(isSnapshot({ version: 1, generated: 'x', attribution: '', places: [], lines: [] })).toBe(true);
+    expect(isSnapshot({ version: 2 })).toBe(false);
+  });
+});

@@ -274,7 +274,16 @@ function Main({ saved }: { saved: Saved | null }) {
       selectedId={selectedId}
       onSelect={onListSelect}
       empty={emptyState}
-      header={inBerlin && filters.categories.includes('transit') ? <BerlinNightCard at={at} /> : undefined}
+      header={
+        <>
+          {data.snapshotDate ? (
+            <Text style={styles.dataNote}>
+              Daten: OpenStreetMap, aufbereitet {formatDataDate(data.snapshotDate, now)}
+            </Text>
+          ) : null}
+          {inBerlin && filters.categories.includes('transit') ? <BerlinNightCard at={at} /> : null}
+        </>
+      }
     />
   ) : (
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 32 }}>
@@ -384,6 +393,14 @@ function Main({ saved }: { saved: Saved | null }) {
       </View>
     </View>
   );
+}
+
+function formatDataDate(d: Date, now: Date): string {
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} Uhr`;
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (d.toDateString() === now.toDateString()) return `heute, ${time}`;
+  if (d.toDateString() === yesterday.toDateString()) return `gestern, ${time}`;
+  return `am ${d.getDate()}.${d.getMonth() + 1}., ${time}`;
 }
 
 function Brand() {
@@ -537,6 +554,7 @@ const styles = StyleSheet.create({
   },
   handleArea: { alignItems: 'center', paddingTop: 8, paddingBottom: 2 },
   handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: colors.surface3 },
+  dataNote: { color: colors.faint, fontSize: 12, marginBottom: 8 },
   emptyTitle: { color: colors.text, fontSize: 17, fontWeight: '700', marginBottom: 6 },
   emptyText: { color: colors.muted, fontSize: 14, textAlign: 'center', lineHeight: 20 },
   link: { color: colors.accent, fontWeight: '700', marginTop: 12 },

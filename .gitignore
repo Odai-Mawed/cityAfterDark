@@ -40,3 +40,6 @@ yarn-error.*
 /ios
 /android
 .env
+
+# generated daily by scripts/build-berlin-data.ts (CI)
+public/data/

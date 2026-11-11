@@ -1,6 +1,7 @@
 # Netlify: static web build of the Expo app
 [build]
-  command = "npx expo export --platform web"
+  # Berlin-Daten holen (darf scheitern – die App fällt dann auf Overpass zurück), dann bauen
+  command = "(npm run data:berlin || echo 'Berlin-Daten nicht verfügbar') && npx expo export --platform web"
   publish = "dist"
 
 [build.environment]
@@ -16,6 +17,12 @@
   for = "/_expo/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Access-Control-Allow-Origin = "*"
 
 [[headers]]
   for = "/*"

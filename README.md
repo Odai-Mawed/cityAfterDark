@@ -70,6 +70,34 @@ npm run map-assets # MapLibre-Bundle neu erzeugen (nach MapLibre-Update)
 
 Web-Tipp: `?demo=1` startet direkt im Demo-Modus, `?lat=52.51&lon=13.42&z=15` öffnet einen bestimmten Ausschnitt.
 
+### Tägliche Berlin-Daten
+
+Statt dass jeder Browser einzeln den oft überlasteten öffentlichen Overpass-Server fragt, holt ein Job **einmal täglich**
+ganz Berlin aus OpenStreetMap, bereinigt die Daten und legt sie als `data/berlin.json` neben die Web-App
+(`scripts/build-berlin-data.ts`, Regeln in `src/core/clean.ts`, getestet):
+
+- Orte, die in den nächsten 14 Tagen gar nicht öffnen, fliegen raus (geschlossen, Winterpause).
+- Restaurants, Imbisse und Supermärkte bleiben nur, wenn sie zwischen 22:30 und 5 Uhr offen haben.
+- Nur Tags, die die App nutzt; Liniengeometrie auf ~5 m vereinfacht.
+
+Die App lädt in Berlin diese Datei (in der Liste steht „Daten: OpenStreetMap, aufbereitet heute, 04:23 Uhr“) und fragt
+Overpass nur noch außerhalb Berlins oder wenn die Datei fehlt bzw. älter als 7 Tage ist.
+
+```bash
+npm run data:berlin   # schreibt public/data/berlin.json (nicht eingecheckt)
+```
+
+Automatisch läuft das über **GitHub Actions** (`.github/workflows/berlin-data.yml`): täglich um 03:23 UTC, bei Pushes und
+per Hand („Run workflow“). Der Workflow holt die Daten, baut die App und deployt auf Netlify. Dafür im GitHub-Repo unter
+*Settings → Secrets and variables → Actions* zwei Secrets anlegen:
+
+| Secret | Wert |
+| --- | --- |
+| `NETLIFY_AUTH_TOKEN` | Netlify Personal Access Token |
+| `NETLIFY_SITE_ID` | Site ID aus Netlify (*Site configuration → General*) |
+
+Der Zeitplan (`schedule`) läuft bei GitHub nur auf dem Standard-Branch – also nach dem Merge nach `main`.
+
 ### Web-Deployment (Netlify)
 
 Live unter **https://cityafterdark.netlify.app**. `netlify.toml` enthält Build-Befehl, Ausgabeordner und
