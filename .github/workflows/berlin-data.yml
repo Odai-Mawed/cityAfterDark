@@ -24,7 +24,10 @@ on:
 
 concurrency:
   group: berlin-data
-  cancel-in-progress: false
+  cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
   data-and-deploy:
@@ -49,6 +52,20 @@ jobs:
           name: berlin-data
           path: public/data/berlin.json
           retention-days: 7
+
+      # Der aktuelle Stand liegt zusätzlich auf dem Branch „berlin-data“
+      # (ein einziger Commit, wird jedes Mal ersetzt) – so kann man ihn auch
+      # ohne Netlify-Secrets abholen und deployen.
+      - name: Daten auf Branch berlin-data ablegen
+        run: |
+          mkdir -p /tmp/berlin-data && cp public/data/berlin.json /tmp/berlin-data/
+          cd /tmp/berlin-data
+          git init -q -b berlin-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add berlin.json
+          git commit -q -m "Berlin-Daten $(date -u +%FT%TZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" berlin-data
 
       - name: Web-App bauen
         run: npx expo export --platform web
