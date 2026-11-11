@@ -27,7 +27,10 @@ describe('categories', () => {
     expect(classify({ shop: 'convenience', name: 'Späti am Eck' })).toEqual({ category: 'spaeti', kind: 'Späti' });
     expect(classify({ shop: 'convenience', name: 'Kaufhalle' })?.kind).toBe('Spätkauf');
     expect(classify({ amenity: 'fast_food', cuisine: 'kebab;pizza' })).toEqual({ category: 'food', kind: 'Döner' });
-    expect(classify({ amenity: 'fuel' })?.category).toBe('essentials');
+    expect(classify({ amenity: 'fuel' })).toEqual({ category: 'fuel', kind: 'Tankstelle' });
+    expect(classify({ amenity: 'fuel', opening_hours: '24/7' })?.kind).toBe('Tankstelle 24h');
+    expect(classify({ amenity: 'fuel', shop: 'convenience' })?.category).toBe('fuel');
+    expect(classify({ amenity: 'pharmacy' })?.category).toBe('essentials');
     expect(classify({ amenity: 'bench' })).toBeNull();
   });
   it('respects allowed categories', () => {
@@ -311,5 +314,20 @@ describe('map style', () => {
       provider: 'custom',
       style: 'https://s/style.json?t=x',
     });
+  });
+});
+
+describe('berlin fuel stations (real OSM data)', () => {
+  it('are fuel places in Berlin with unique ids', async () => {
+    const { BERLIN_FUEL } = await import('../src/data/berlinFuel');
+    const { isInBerlin } = await import('../src/core/berlin');
+    expect(BERLIN_FUEL.length).toBeGreaterThanOrEqual(30);
+    expect(new Set(BERLIN_FUEL.map((p) => p.id)).size).toBe(BERLIN_FUEL.length);
+    expect(BERLIN_FUEL.filter((p) => !(p.category === 'fuel' && isInBerlin(p) && classify(p.tags)?.category === 'fuel')).map((p) => [p.name, classify(p.tags)])).toEqual([]);
+    expect(BERLIN_FUEL.find((p) => p.id === 'way/37419537')?.name).toBe('Shell · Skalitzer Straße');
+    const open24 = BERLIN_FUEL.filter((p) => p.kind === 'Tankstelle 24h');
+    expect(open24.length).toBeGreaterThan(15);
+    const sat3 = new Date(2026, 10, 14, 3, 0);
+    expect(filterPlaces(open24, { ...DEFAULT_FILTERS, categories: ['fuel'] }, sat3, open24[0])).toHaveLength(open24.length);
   });
 });

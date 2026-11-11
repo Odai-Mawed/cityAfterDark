@@ -2,12 +2,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { isInBerlin } from '../core/berlin';
 import { classify } from '../core/categories';
 import { generateDemo } from '../core/demo';
+import { BERLIN_FUEL } from '../data/berlinFuel';
 import { HIGHLIGHT_BY_ID, highlightPlaces } from '../data/berlinHighlights';
 import { clampBBox, containsBBox, distance, padBBox } from '../core/geo';
 import { fetchNightlife } from '../core/overpass';
 import type { BBox, CategoryId, LatLon, Place, Region, TransitLine } from '../core/types';
 
 export const MIN_ZOOM = 13;
+
+/** Real Berlin data bundled with the app: curated tips + fuel stations. */
+function berlinBaseline(): Place[] {
+  return [...highlightPlaces(classify), ...BERLIN_FUEL];
+}
 const MAX_BBOX_DEG = 0.22;
 const DEBOUNCE_MS = 700;
 const PRUNE_KM = 40;
@@ -121,7 +127,7 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
   const [snapshot, setSnapshot] = useState<{ places: Place[]; lines: TransitLine[] }>({ places: [], lines: [] });
   useEffect(() => {
     if (demo && demoCenter.current) {
-      setSnapshot(isInBerlin(demoCenter.current) ? { places: highlightPlaces(classify), lines: [] } : generateDemo(demoCenter.current));
+      setSnapshot(isInBerlin(demoCenter.current) ? { places: berlinBaseline(), lines: [] } : generateDemo(demoCenter.current));
     } else {
       const live = [...places.current.values()].map((p) => {
         const h = HIGHLIGHT_BY_ID.get(p.id);
@@ -129,7 +135,7 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
       });
       // In Berlin the curated real venues show up right away, before (or
       // without) a live answer from Overpass.
-      const extra = inBerlinView ? highlightPlaces(classify).filter((h) => !places.current.has(h.id)) : [];
+      const extra = inBerlinView ? berlinBaseline().filter((h) => !places.current.has(h.id)) : [];
       setSnapshot({ places: [...live, ...extra], lines: [...lines.current.values()] });
     }
   }, [version, demo, inBerlinView]);

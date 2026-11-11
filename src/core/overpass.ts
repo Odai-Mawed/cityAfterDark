@@ -75,8 +75,13 @@ export interface ParsedData {
   lines: TransitLine[];
 }
 
-function placeName(tags: Tags, kind: string): string {
-  return tags.name || tags.brand || tags.operator || kind;
+export function placeName(tags: Tags, kind: string): string {
+  const name = tags.name || tags.brand || tags.operator || kind;
+  // chains like "Aral" or "Shell" are only distinguishable by street
+  if (tags.amenity === 'fuel' && tags['addr:street'] && !name.includes(tags['addr:street'])) {
+    return `${name} · ${tags['addr:street']}`;
+  }
+  return name;
 }
 
 export function parseResponse(elements: OsmElement[], categories: CategoryId[]): ParsedData {

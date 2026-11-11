@@ -81,6 +81,8 @@ export const CATEGORIES: CategoryDef[] = [
     selectors: ['nwr["shop"~"^(convenience|kiosk)$"]'],
     match: (t) => {
       if (t.shop !== 'convenience' && t.shop !== 'kiosk') return null;
+      if (t.amenity === 'fuel') return null; // fuel station shop → "Tankstellen"
+
       if (SPAETI_NAME.test(t.name ?? '')) return 'Späti';
       return t.shop === 'kiosk' ? 'Kiosk' : 'Spätkauf';
     },
@@ -128,18 +130,25 @@ export const CATEGORIES: CategoryDef[] = [
     },
   },
   {
+    id: 'fuel',
+    label: 'Tankstellen',
+    emoji: '⛽',
+    color: '#9be15d',
+    description: 'Tankstellen – nachts oft der letzte offene Shop',
+    selectors: ['nwr["amenity"="fuel"]'],
+    match: (t) => {
+      if (t.amenity !== 'fuel') return null;
+      return (t.opening_hours ?? '').trim() === '24/7' ? 'Tankstelle 24h' : 'Tankstelle';
+    },
+  },
+  {
     id: 'essentials',
     label: 'Versorgung',
-    emoji: '⛽',
+    emoji: '💊',
     color: '#7ee081',
-    description: 'Tankstellen, Apotheken, Supermärkte',
-    selectors: [
-      'nwr["amenity"="fuel"]',
-      'nwr["amenity"="pharmacy"]',
-      'nwr["shop"="supermarket"]["opening_hours"]',
-    ],
+    description: 'Apotheken und Supermärkte',
+    selectors: ['nwr["amenity"="pharmacy"]', 'nwr["shop"="supermarket"]["opening_hours"]'],
     match: (t) => {
-      if (t.amenity === 'fuel') return 'Tankstelle';
       if (t.amenity === 'pharmacy') return 'Apotheke';
       if (t.shop === 'supermarket') return 'Supermarkt';
       return null;

@@ -4,6 +4,7 @@ export type CategoryId =
   | 'spaeti'
   | 'food'
   | 'culture'
+  | 'fuel'
   | 'essentials'
   | 'transit';
 

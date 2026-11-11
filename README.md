@@ -9,8 +9,8 @@ Gebaut mit **React Native + Expo**: ein Code-Stand für **Android, iOS und Web**
 ## Funktionen
 
 - **Karte** mit allen Orten im sichtbaren Bereich (Daten live aus OpenStreetMap über die Overpass API)
-- **Kategorien:** 🪩 Clubs · 🍸 Bars & Kneipen · 🍺 Spätis/Kioske · 🌯 Spätes Essen · 🎬 Kultur & Spiel · ⛽ Versorgung
-  (Tankstellen, Apotheken, Supermärkte) · 🌙 Nachtverkehr (Nachtbusse, Nacht-Trams, Nachtzüge)
+- **Kategorien:** 🪩 Clubs · 🍸 Bars & Kneipen · 🍺 Spätis/Kioske · 🌯 Spätes Essen · 🎬 Kultur & Spiel · ⛽ Tankstellen
+  · 💊 Versorgung (Apotheken, Supermärkte) · 🌙 Nachtverkehr (Nachtbusse, Nacht-Trams, Nachtzüge)
 - **Zeitfilter in „Nächten“:** Eine Nacht läuft von 12:00 bis 12:00. „Fr/Sa · 02:00“ bedeutet also Samstag 02:00 Uhr.
   Dazu gibt es „Jetzt“ (live), ±30 Minuten und Schnellwahl für 18 bis 06 Uhr.
 - **„Noch mindestens geöffnet“:** z. B. nur Orte, die noch 2 Stunden offen haben
@@ -46,6 +46,8 @@ Gebaut mit **React Native + Expo**: ein Code-Stand für **Android, iOS und Web**
   (aktuelles Programm, Tickets); die Club-Beschreibungen orientieren sich an RA. In den Live-Daten sind
   diese Orte mit ★ und einer Kurzbeschreibung markiert. Ist Overpass nicht erreichbar, zeigt die App sie als
   „Offline-Auswahl“ statt erfundener Demo-Orte.
+- **Tankstellen:** 38 Tankstellen der Innenstadt aus OpenStreetMap als Grunddaten (`src/data/berlinFuel.ts`), die
+  meisten rund um die Uhr geöffnet.
 - Feiertage werden nach Berliner Recht ausgewertet (z. B. Frauentag am 8. März).
 
 ## Loslegen
