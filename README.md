@@ -60,7 +60,7 @@ Weitere Befehle:
 npm test           # Unit-Tests der Kernlogik (Vitest)
 npm run typecheck  # TypeScript
 npm run build:web  # statischer Web-Build nach dist/
-npm run leaflet    # Leaflet-Bundle neu erzeugen (nach Leaflet-Update)
+npm run map-assets # MapLibre-Bundle neu erzeugen (nach MapLibre-Update)
 ```
 
 Web-Tipp: `?demo=1` startet direkt im Demo-Modus, `?lat=52.51&lon=13.42&z=15` öffnet einen bestimmten Ausschnitt.
@@ -100,8 +100,9 @@ src/core/                Plattformunabhängige Logik (getestet)
   time.ts                Zeitauswahl in Nächten
   filter.ts              Filtern und Sortieren (offen zuerst, dann Entfernung)
   geocode.ts, demo.ts    Ortssuche (Nominatim), Demo-Daten
-src/map/                 Karte: Leaflet in einer HTML-Seite
-  mapHtml.ts             Karten-Controller (Canvas-Marker, Linien, Auswahl)
+src/map/                 Karte: MapLibre GL in einer HTML-Seite
+  mapHtml.ts             Karten-Controller (GeoJSON-Layer für Orte, Linien, Auswahl)
+  tiles.ts               Kartenstil (OpenFreeMap, optional MapTiler/Stadia mit Key)
   MapSurface.tsx         iOS/Android → WebView
   MapSurface.web.tsx     Web → iframe
   NightMap.tsx           React-Komponente + postMessage-Bridge
@@ -109,15 +110,25 @@ src/state/               Datenladen mit Bereichs-Cache, Speichern der Einstellun
 src/ui/                  Suche, Zeitwahl, Filter, Liste, Details
 ```
 
-Die Karte läuft auf allen Plattformen mit **demselben Leaflet-Code**. Leaflet ist eingebettet, es wird also kein CDN
-gebraucht, und es ist **kein Google-Maps-API-Key** nötig. Daten werden erst ab Zoomstufe 13 geladen. Bereits geladene
+Die Karte ist eine **Vektorkarte mit MapLibre GL** und läuft auf allen Plattformen mit demselben Code. MapLibre ist
+eingebettet, es wird also kein CDN gebraucht. Der Kartenstil kommt standardmäßig von **OpenFreeMap („dark“): kostenlos,
+ohne API-Key und ohne Limit.**
+
+Wer einen anderen Anbieter möchte, trägt ihn in `.env.local` oder in den Netlify-/EAS-Umgebungsvariablen ein (siehe
+`.env.example` und `src/map/tiles.ts`):
+
+```bash
+EXPO_PUBLIC_MAP_PROVIDER=maptiler   # oder stadia, custom
+EXPO_PUBLIC_MAP_KEY=dein-key        # öffentlicher Client-Key, im Anbieter-Dashboard auf deine Domain beschränken
+```
+
+Kann die Karte nicht laden (offline, gesperrt, falscher Key), läuft die App auf dunklem Hintergrund weiter. Daten werden erst ab Zoomstufe 13 geladen. Bereits geladene
 Bereiche und Kategorien werden nicht erneut abgefragt.
 
 ## Daten & Lizenzen
 
 - Orte und Linien: © [OpenStreetMap](https://www.openstreetmap.org/copyright)-Mitwirkende (ODbL), über die Overpass API
-- Kartenkacheln: © [CARTO](https://carto.com/attributions) (Dark Matter). Für einen kommerziellen Einsatz bitte die
-  CARTO-Nutzungsbedingungen prüfen oder einen eigenen Tile-Anbieter eintragen (`mapHtml.ts`).
+- Karte: [OpenFreeMap](https://openfreemap.org) · © [OpenMapTiles](https://openmaptiles.org) · Daten © OpenStreetMap
 - Ortssuche: [Nominatim](https://operations.osmfoundation.org/policies/nominatim/). Bei vielen Nutzern ist ein eigener
   Geocoding-Dienst nötig.
 

@@ -43,6 +43,7 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
   const demoCenter = useRef<LatLon | null>(null);
 
   const catsKey = [...categories].sort().join(',');
+  const inBerlinView = !!region && isInBerlin(region.center);
 
   useEffect(() => {
     if (!region || demo) return;
@@ -122,15 +123,16 @@ export function useNightlifeData(region: Region | null, categories: CategoryId[]
     if (demo && demoCenter.current) {
       setSnapshot(isInBerlin(demoCenter.current) ? { places: highlightPlaces(classify), lines: [] } : generateDemo(demoCenter.current));
     } else {
-      setSnapshot({
-        places: [...places.current.values()].map((p) => {
-          const highlight = HIGHLIGHT_BY_ID.get(p.id);
-          return highlight ? { ...p, highlight } : p;
-        }),
-        lines: [...lines.current.values()],
+      const live = [...places.current.values()].map((p) => {
+        const highlight = HIGHLIGHT_BY_ID.get(p.id);
+        return highlight ? { ...p, highlight } : p;
       });
+      // In Berlin the curated real venues show up right away, before (or
+      // without) a live answer from Overpass.
+      const extra = inBerlinView ? highlightPlaces(classify).filter((h) => !places.current.has(h.id)) : [];
+      setSnapshot({ places: [...live, ...extra], lines: [...lines.current.values()] });
     }
-  }, [version, demo]);
+  }, [version, demo, inBerlinView]);
 
   const curated = demo && !!demoCenter.current && isInBerlin(demoCenter.current);
   return { ...snapshot, status: demo ? 'idle' : status, error: demo ? null : error, demo, curated, setDemo, retry };

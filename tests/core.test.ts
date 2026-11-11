@@ -143,6 +143,20 @@ describe('overpass', () => {
     expect(lines[0].stops).toEqual([{ lat: 52.52, lon: 13.42, name: 'Hauptbahnhof' }]);
   });
 
+  it('moves on when a server hangs', async () => {
+    let calls = 0;
+    const fake = ((_url: string, init: RequestInit) => {
+      calls++;
+      if (calls === 1) {
+        return new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new Error('aborted'))));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ elements }), { status: 200 }));
+    }) as typeof fetch;
+    const data = await fetchNightlife({ south: 0, west: 0, north: 1, east: 1 }, ['club'], undefined, fake, 50);
+    expect(calls).toBe(2);
+    expect(data.places).toHaveLength(1);
+  });
+
   it('falls back to the next endpoint', async () => {
     let calls = 0;
     const fake = (async () => {
@@ -274,5 +288,22 @@ describe('berlin highlights (real OSM data)', () => {
     const places = highlightPlaces(classify);
     const clash = places.find((p) => p.name === 'Clash')!;
     expect(filterPlaces([clash], DEFAULT_FILTERS, NOW, clash)).toHaveLength(1);
+  });
+});
+
+describe('map style', () => {
+  it('uses OpenFreeMap without a key and providers with one', async () => {
+    const { resolveMapStyle, OPENFREEMAP } = await import('../src/map/tiles');
+    expect(resolveMapStyle({})).toBe(OPENFREEMAP);
+    expect(resolveMapStyle({ provider: 'maptiler' })).toBe(OPENFREEMAP);
+    expect(resolveMapStyle({ style: 'positron' }).style).toBe('https://tiles.openfreemap.org/styles/positron');
+    expect(resolveMapStyle({ provider: 'MapTiler', key: 'abc 1' }).style).toBe(
+      'https://api.maptiler.com/maps/dataviz-dark/style.json?key=abc%201',
+    );
+    expect(resolveMapStyle({ provider: 'stadia', key: 'k' }).style).toContain('alidade_smooth_dark.json?api_key=k');
+    expect(resolveMapStyle({ provider: 'custom', style: 'https://s/style.json?t={key}', key: 'x' })).toEqual({
+      provider: 'custom',
+      style: 'https://s/style.json?t=x',
+    });
   });
 });

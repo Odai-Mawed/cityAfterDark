@@ -16,7 +16,7 @@ export function bboxString(b: BBox): string {
 }
 
 /** Builds one Overpass QL query for the requested categories in a bbox. */
-export function buildQuery(bbox: BBox, categories: CategoryId[], timeout = 40): string {
+export function buildQuery(bbox: BBox, categories: CategoryId[], timeout = 25): string {
   const bb = bboxString(bbox);
   const placeCats = categories.filter((c) => c !== 'transit');
   const lines: string[] = [`[out:json][timeout:${timeout}];`];
@@ -211,22 +211,30 @@ function lineCenter(l: TransitLine): LatLon {
 
 export class OverpassError extends Error {}
 
+/** Per-server time limit – a slow public instance should not block the app. */
+export const ENDPOINT_TIMEOUT_MS = 30000;
+
 /** Fetches places and night lines, trying several public Overpass instances. */
 export async function fetchNightlife(
   bbox: BBox,
   categories: CategoryId[],
   signal?: AbortSignal,
   fetchImpl: typeof fetch = fetch,
+  timeoutMs = ENDPOINT_TIMEOUT_MS,
 ): Promise<ParsedData> {
   const query = buildQuery(bbox, categories);
   let lastError: unknown;
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    const ctrl = new AbortController();
+    const onAbort = () => ctrl.abort();
+    signal?.addEventListener('abort', onAbort);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
       const res = await fetchImpl(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `data=${encodeURIComponent(query)}`,
-        signal,
+        signal: ctrl.signal,
       });
       if (!res.ok) throw new OverpassError(`Overpass ${res.status}`);
       const json = (await res.json()) as { elements?: OsmElement[]; remark?: string };
@@ -237,7 +245,10 @@ export async function fetchNightlife(
       return parseResponse(json.elements, categories);
     } catch (e) {
       if (signal?.aborted) throw e;
-      lastError = e;
+      lastError = ctrl.signal.aborted ? new OverpassError('Zeitüberschreitung') : e;
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
     }
   }
   throw lastError instanceof Error ? lastError : new OverpassError('Overpass nicht erreichbar');
