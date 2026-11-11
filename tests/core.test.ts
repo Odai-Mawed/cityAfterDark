@@ -370,3 +370,26 @@ describe('data cleaning', () => {
     expect(isSnapshot({ version: 2 })).toBe(false);
   });
 });
+
+describe('osm extract (osmium/OPL)', () => {
+  it('parses OPL and selects places and night routes', async () => {
+    const { elementsFromOpl, oplUnescape, wantedRoute } = await import('../scripts/osm-extract');
+    expect(oplUnescape('Bar%20%im%2c%Kiez')).toBe('Bar im,Kiez');
+    expect(wantedRoute({ type: 'route', route: 'bus', ref: 'N 8' })).toBe(true);
+    expect(wantedRoute({ type: 'route', route: 'bus', ref: '248' })).toBe(false);
+    expect(wantedRoute({ type: 'route', route: 'light_rail', ref: 'S7' })).toBe(true);
+    const els = await elementsFromOpl([
+      'n1 Tamenity=nightclub,name=Club%20%A x13.43 y52.51',
+      'n2 Tamenity=restaurant,name=Ohne x13.43 y52.51',
+      'n3 x13.40 y52.50',
+      'n4 x13.41 y52.51',
+      'w10 Thighway=primary Nn3,n4',
+      'r20 Ttype=route,route=bus,ref=N1 Mw10@',
+    ]);
+    const byId = Object.fromEntries(els.map((e) => [`${e.type}/${e.id}`, e]));
+    expect(byId['node/1'].tags!.name).toBe('Club A');
+    expect(byId['node/2']).toBeDefined(); // named → kept for stop names, dropped later by cleaning
+    expect(byId['way/10']).toBeUndefined();
+    expect(byId['relation/20'].members![0].geometry).toEqual([{ lat: 52.5, lon: 13.4 }, { lat: 52.51, lon: 13.41 }]);
+  });
+});

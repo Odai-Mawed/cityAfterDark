@@ -72,9 +72,12 @@ Web-Tipp: `?demo=1` startet direkt im Demo-Modus, `?lat=52.51&lon=13.42&z=15` ö
 
 ### Tägliche Berlin-Daten
 
-Statt dass jeder Browser einzeln den oft überlasteten öffentlichen Overpass-Server fragt, holt ein Job **einmal täglich**
-ganz Berlin aus OpenStreetMap, bereinigt die Daten und legt sie als `data/berlin.json` neben die Web-App
-(`scripts/build-berlin-data.ts`, Regeln in `src/core/clean.ts`, getestet):
+Statt dass jeder Browser einzeln den oft überlasteten öffentlichen Overpass-Server fragt, lädt ein Job **einmal täglich**
+den Berlin-Export von [Geofabrik](https://download.geofabrik.de/europe/germany/berlin.html) (komplette
+OpenStreetMap-Daten Berlins, täglich aktualisiert), filtert ihn mit [osmium](https://osmcode.org/osmium-tool/),
+bereinigt die Daten und legt sie als `data/berlin.json` neben die Web-App (`scripts/build-berlin-data.ts`,
+`scripts/osm-extract.ts`, Regeln in `src/core/clean.ts`, getestet). Mit `DATA_SOURCE=overpass` geht es alternativ über
+Overpass.
 
 - Orte, die in den nächsten 14 Tagen gar nicht öffnen, fliegen raus (geschlossen, Winterpause).
 - Restaurants, Imbisse und Supermärkte bleiben nur, wenn sie zwischen 22:30 und 5 Uhr offen haben.
@@ -84,7 +87,7 @@ Die App lädt in Berlin diese Datei (in der Liste steht „Daten: OpenStreetMap,
 Overpass nur noch außerhalb Berlins oder wenn die Datei fehlt bzw. älter als 7 Tage ist.
 
 ```bash
-npm run data:berlin   # schreibt public/data/berlin.json (nicht eingecheckt)
+npm run data:berlin   # braucht osmium-tool (apt install osmium-tool); schreibt public/data/berlin.json
 ```
 
 Automatisch läuft das über **GitHub Actions** (`.github/workflows/berlin-data.yml`): täglich um 03:23 UTC, bei Pushes und
