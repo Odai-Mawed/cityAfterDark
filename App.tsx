@@ -17,7 +17,7 @@ import { BERLIN_HIGHLIGHTS_DATE } from './src/data/berlinHighlights';
 import { CATEGORY_BY_ID } from './src/core/categories';
 import { DEFAULT_FILTERS, filterLines, filterPlaces, type Filters } from './src/core/filter';
 import { CITIES, reverseRegion, type City, type GeoResult } from './src/core/geocode';
-import { distance } from './src/core/geo';
+import { distance, inBBox, padBBox } from './src/core/geo';
 import { getHoursRegion, setHoursRegion } from './src/core/hours';
 import { describeSelection, resolveTime, type TimeSelection } from './src/core/time';
 import type { LatLon, Region } from './src/core/types';
@@ -136,8 +136,23 @@ function Main({ saved }: { saved: Saved | null }) {
     return () => ctrl.abort();
   }, [region]);
 
-  const results = useMemo(() => filterPlaces(data.places, filters, at, origin), [data.places, filters, at, origin]);
-  const lines = useMemo(() => filterLines(data.lines, filters, at, origin), [data.lines, filters, at, origin]);
+  // Only what's around the visible map: keeps thousands of Berlin places fast.
+  const viewBox = useMemo(() => (region ? padBBox(region.bbox, 0.5) : null), [region]);
+  const visiblePlaces = useMemo(
+    () => (viewBox ? data.places.filter((p) => inBBox(viewBox, p) || p.id === selectedId) : data.places),
+    [data.places, viewBox, selectedId],
+  );
+  const results = useMemo(() => filterPlaces(visiblePlaces, filters, at, origin), [visiblePlaces, filters, at, origin]);
+  const visibleLines = useMemo(
+    () =>
+      viewBox
+        ? data.lines.filter(
+            (l) => l.id === selectedId || l.coords.some((seg) => seg.some(([lat, lon]) => inBBox(viewBox, { lat, lon }))),
+          )
+        : data.lines,
+    [data.lines, viewBox, selectedId],
+  );
+  const lines = useMemo(() => filterLines(visibleLines, filters, at, origin), [visibleLines, filters, at, origin]);
   const inBerlin = isInBerlin(region?.center ?? initialView);
 
   const items: ListItem[] = useMemo(() => {
