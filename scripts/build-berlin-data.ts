@@ -17,7 +17,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BERLIN_BBOX } from '../src/core/berlin';
 import { CATEGORIES } from '../src/core/categories';
-import { SNAPSHOT_VERSION, cleanLines, cleanPlaces, type Snapshot } from '../src/core/clean';
+import { SNAPSHOT_VERSION, applyClubHours, cleanLines, cleanPlaces, type ClubHoursEntry, type Snapshot } from '../src/core/clean';
 import { setHoursRegion } from '../src/core/hours';
 import { OVERPASS_ENDPOINTS, buildQuery, parseResponse, type OsmElement } from '../src/core/overpass';
 import type { BBox, CategoryId } from '../src/core/types';
@@ -33,6 +33,22 @@ const ALL: CategoryId[] = CATEGORIES.map((c) => c.id);
 // fast and reliable. overpass: public Overpass servers (fallback).
 const SOURCE = process.env.DATA_SOURCE ?? 'geofabrik';
 const PBF_URL = 'https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf';
+// Approved club hours from the n8n review flow ("CityAfterDark – Club-Zeiten").
+const CLUB_HOURS_URL =
+  process.env.CLUB_HOURS_URL ?? 'https://odaimawed4.app.n8n.cloud/webhook/cityafterdark-club-hours';
+
+async function loadClubHours(): Promise<ClubHoursEntry[]> {
+  if (!CLUB_HOURS_URL) return [];
+  try {
+    const res = await fetch(CLUB_HOURS_URL, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as { clubs?: ClubHoursEntry[] };
+    return Array.isArray(json.clubs) ? json.clubs : [];
+  } catch (e) {
+    console.warn(`Club-Zeiten aus n8n nicht verfügbar (${(e as Error).message}) – es bleiben die OSM-Zeiten`);
+    return [];
+  }
+}
 // Small queries are answered much more reliably than one big one per tile.
 const GROUPS: CategoryId[][] = [
   ['club', 'bar', 'spaeti', 'culture', 'fuel', 'essentials'],
@@ -152,7 +168,13 @@ async function main() {
   const { elements, areas } = SOURCE === 'overpass' ? await fromOverpass() : await fromGeofabrik();
 
   const parsed = parseResponse(elements, ALL);
-  const { places, stats } = cleanPlaces(parsed.places, now);
+  const clubHours = await loadClubHours();
+  const withHours = applyClubHours(parsed.places, clubHours, now);
+  console.log(
+    `Club-Zeiten von Websites: ${withHours.applied} übernommen` +
+      (withHours.skipped.length ? `, ${withHours.skipped.length} übersprungen (${withHours.skipped.join(', ')})` : ''),
+  );
+  const { places, stats } = cleanPlaces(withHours.places, now);
   const lines = cleanLines(parsed.lines);
 
   const snapshot: Snapshot = {

@@ -9,6 +9,11 @@ import { nightOf } from '../core/time';
 import type { LatLon, Place, TransitLine } from '../core/types';
 import { colors, radius, stateColor } from './theme';
 
+function formatCheckDate(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return y && m && d ? `${Number(d)}.${Number(m)}.${y}` : iso;
+}
+
 function open(url: string) {
   Linking.openURL(url).catch(() => undefined);
 }
@@ -74,6 +79,12 @@ export function PlaceDetail({ place, at, origin, onClose }: PlaceDetailProps) {
 
       <View style={[styles.statusCard, { borderColor: stateColor[status.state] }]}>
         <Text style={[styles.statusText, { color: stateColor[status.state] }]}>{status.label}</Text>
+        {place.tags['cad:hours_source'] === 'website' ? (
+          <Text style={styles.comment}>
+            Zeiten laut Club-Website{place.tags['cad:hours_checked'] ? `, geprüft am ${formatCheckDate(place.tags['cad:hours_checked'])}` : ''}
+            {place.tags['cad:hours_note'] ? ` · ${place.tags['cad:hours_note']}` : ''}
+          </Text>
+        ) : null}
         {status.comment && status.state !== 'unknown' ? <Text style={styles.comment}>„{status.comment}“</Text> : null}
       </View>
 

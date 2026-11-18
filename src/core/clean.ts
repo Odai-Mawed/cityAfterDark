@@ -14,6 +14,8 @@ const KEEP_TAGS = new Set([
   'outdoor_seating', 'beer_garden', 'smoking', 'wheelchair', 'live_music', 'dance', 'dance:venue',
   'lgbtq', 'gay', 'diet:vegan', 'fee', 'description',
   'payment:cards', 'payment:debit_cards', 'payment:credit_cards', 'payment:girocard', 'payment:contactless',
+  // set by applyClubHours: opening hours from the club's own website (checked in n8n)
+  'cad:hours_source', 'cad:hours_note', 'cad:hours_checked',
 ]);
 
 export function trimTags(tags: Tags): Tags {
@@ -91,6 +93,47 @@ export function cleanPlaces(places: Place[], now: Date): { places: Place[]; stat
   }
   stats.output = out.length;
   return { places: out, stats };
+}
+
+/** Approved club hours from the n8n review table (CityAfterDark – Club-Zeiten). */
+export interface ClubHoursEntry {
+  id: string;
+  name?: string;
+  opening_hours: string;
+  note?: string;
+  approved_at?: string | null;
+  source?: string;
+}
+
+/**
+ * Replaces the OSM opening hours of clubs with the approved hours from their
+ * own websites – but only if the value parses and opens within the next two
+ * weeks (an expired list of event dates must not hide the club).
+ */
+export function applyClubHours(
+  places: Place[],
+  entries: ClubHoursEntry[],
+  now: Date,
+): { places: Place[]; applied: number; skipped: string[] } {
+  const byId = new Map(entries.map((e) => [e.id, e]));
+  const skipped: string[] = [];
+  let applied = 0;
+  const out = places.map((p) => {
+    const e = byId.get(p.id);
+    if (!e) return p;
+    const hours = String(e.opening_hours ?? '').trim();
+    const tags: Tags = { ...p.tags, opening_hours: hours };
+    if (!hours || !parseHours(hours) || !(intervals(tags, now, 14)?.length ?? 0)) {
+      skipped.push(e.name ?? e.id);
+      return p;
+    }
+    tags['cad:hours_source'] = 'website';
+    if (e.note) tags['cad:hours_note'] = e.note.slice(0, 160);
+    if (e.approved_at) tags['cad:hours_checked'] = String(e.approved_at).slice(0, 10);
+    applied++;
+    return { ...p, tags };
+  });
+  return { places: out, applied, skipped };
 }
 
 const round = (n: number, d: number) => Math.round(n * 10 ** d) / 10 ** d;

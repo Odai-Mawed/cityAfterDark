@@ -393,3 +393,28 @@ describe('osm extract (osmium/OPL)', () => {
     expect(byId['relation/20'].members![0].geometry).toEqual([{ lat: 52.5, lon: 13.4 }, { lat: 52.51, lon: 13.41 }]);
   });
 });
+
+describe('club hours from n8n', () => {
+  it('applies valid approved hours and skips expired or broken ones', async () => {
+    const { applyClubHours, cleanPlaces } = await import('../src/core/clean');
+    const now = new Date(2026, 10, 18, 12, 0); // Wed
+    const a = place({ amenity: 'nightclub', name: 'A' }, { id: 'node/1' });
+    const b = place({ amenity: 'nightclub', name: 'B', opening_hours: 'Fr 23:00-06:00' }, { id: 'node/2' });
+    const c = place({ amenity: 'nightclub', name: 'C' }, { id: 'node/3' });
+    const r = applyClubHours(
+      [a, b, c],
+      [
+        { id: 'node/1', name: 'A', opening_hours: 'Sa 23:59-24:00; Su 00:00-24:00', note: 'Klubnacht', approved_at: '2026-11-18T10:00:00Z' },
+        { id: 'node/2', name: 'B', opening_hours: '2026 Oct 03 23:00-06:00' }, // expired event
+        { id: 'node/3', name: 'C', opening_hours: 'kaputt!!' },
+      ],
+      now,
+    );
+    expect(r.applied).toBe(1);
+    expect(r.skipped).toEqual(['B', 'C']);
+    expect(r.places[0].tags).toMatchObject({ opening_hours: 'Sa 23:59-24:00; Su 00:00-24:00', 'cad:hours_source': 'website', 'cad:hours_checked': '2026-11-18' });
+    expect(r.places[1].tags.opening_hours).toBe('Fr 23:00-06:00');
+    // the website tags survive cleaning
+    expect(cleanPlaces(r.places, now).places[0].tags['cad:hours_source']).toBe('website');
+  });
+});

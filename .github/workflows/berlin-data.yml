@@ -53,6 +53,9 @@ jobs:
 
       - name: Berlin-Daten aus OpenStreetMap holen und bereinigen
         run: npm run data:berlin
+        env:
+          # freigegebene Club-Öffnungszeiten aus dem n8n-Flow „CityAfterDark – Club-Zeiten“
+          CLUB_HOURS_URL: https://odaimawed4.app.n8n.cloud/webhook/cityafterdark-club-hours
 
       - uses: actions/upload-artifact@v4
         with:

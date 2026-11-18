@@ -101,6 +101,20 @@ per Hand („Run workflow“). Der Workflow holt die Daten, baut die App und dep
 
 Der Zeitplan (`schedule`) läuft bei GitHub nur auf dem Standard-Branch – also nach dem Merge nach `main`.
 
+### Club-Öffnungszeiten aus n8n
+
+Viele Clubs pflegen ihre Zeiten nicht in OpenStreetMap. Zwei n8n-Flows (Instanz des Projektinhabers) schließen die Lücke:
+
+- **„CityAfterDark – Club-Öffnungszeiten prüfen“** (alle 2 Stunden, je 8 Clubs): ruft die **eigene Website** jedes
+  Clubs ab, eine KI (OpenAI) liest die Öffnungszeiten im OSM-Format heraus und speichert sie als Vorschlag in der
+  n8n-Tabelle `cityafterdark_clubs`. Neue Vorschläge kommen per Telegram. Resident Advisor, Facebook und Instagram werden
+  bewusst nicht abgerufen (deren Nutzungsbedingungen verbieten automatisches Auslesen).
+- **Freigabe:** In der Tabelle `approve` anhaken (Zeiten in `proposed_hours` vorher gern korrigieren). Der nächste Lauf
+  übernimmt sie nach `approved_hours`.
+- **„CityAfterDark – Club-Zeiten (Schnittstelle)“**: `GET …/webhook/cityafterdark-club-hours` liefert die freigegebenen
+  Zeiten. Die tägliche Daten-Pipeline übernimmt sie (`applyClubHours` in `src/core/clean.ts`) – nur gültige Zeiten, die
+  in den nächsten 14 Tagen eine Öffnung enthalten. In der App steht dann „Zeiten laut Club-Website, geprüft am …“.
+
 ### Web-Deployment (Netlify)
 
 Live unter **https://cityafterdark.netlify.app**. `netlify.toml` enthält Build-Befehl, Ausgabeordner und
